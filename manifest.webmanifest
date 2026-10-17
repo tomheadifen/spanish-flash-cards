@@ -1,0 +1,18 @@
+{
+  "name": "Tarjetas · Spanish Flashcards",
+  "short_name": "Tarjetas",
+  "description": "Picture flashcards for Spain Spanish vocabulary, grouped by topic.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "es-ES",
+  "background_color": "#f6efe4",
+  "theme_color": "#f6efe4",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
