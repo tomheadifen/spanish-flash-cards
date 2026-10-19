@@ -4,7 +4,7 @@
 // - Pictures: saved once and then served from the phone. On install, every picture
 //   listed in cards.js is downloaded so the whole deck works offline from day one.
 // If you change the list of app files below, bump APP.
-const APP = "tarjetas-app-v1";
+const APP = "tarjetas-app-v2";
 const IMG = "tarjetas-img-v1";
 const SHELL = [
   "./",

@@ -24,7 +24,6 @@ window.TOPICS = [
     { es: "los espaguetis", en: "spaghetti", img: "spaghetti" },
     { es: "el arroz", en: "rice", img: "cooked-rice" },
     { es: "las tortitas", en: "pancakes", img: "pancakes" },
-    { es: "el gofre", en: "waffle", img: "waffle" },
     { es: "la miel", en: "honey", img: "honey-pot" },
     { es: "la sal", en: "salt", img: "salt" },
     { es: "la lata", en: "tin / can", img: "canned-food" },
@@ -41,7 +40,10 @@ window.TOPICS = [
     { es: "el caramelo", en: "sweet / candy", img: "candy" },
     { es: "la piruleta", en: "lollipop", img: "lollipop" },
     { es: "el flan", en: "crème caramel", img: "custard" },
-    { es: "la tarta de fruta", en: "pie", img: "pie" }
+    { es: "la tarta de fruta", en: "pie", img: "pie" },
+    { es: "el gofre", en: "waffle", img: "waffle" },
+    { es: "el granizado", en: "slushie", img: "shaved-ice" },
+    { es: "la copa de helado", en: "ice-cream sundae", img: "ice-cream" }
   ]},
   { id: "bebidas", es: "Las bebidas", en: "Drinks", img: "hot-beverage", cards: [
     { es: "el café", en: "coffee", img: "hot-beverage" },
@@ -55,7 +57,9 @@ window.TOPICS = [
     { es: "el cava", en: "sparkling wine", img: "bottle-with-popping-cork" },
     { es: "el cóctel", en: "cocktail", img: "tropical-drink" },
     { es: "el hielo", en: "ice", img: "ice" },
-    { es: "¡Salud!", en: "Cheers!", img: "clinking-glasses" }
+    { es: "¡Salud!", en: "Cheers!", img: "clinking-glasses" },
+    { es: "el agua", en: "water", img: "potable-water" },
+    { es: "el biberón", en: "baby bottle", img: "baby-bottle" }
   ]},
   { id: "frutas", es: "Las frutas", en: "Fruit", img: "red-apple", cards: [
     { es: "la manzana", en: "apple", img: "red-apple" },
@@ -141,7 +145,8 @@ window.TOPICS = [
     { es: "el pato", en: "duck", img: "duck" },
     { es: "el pavo", en: "turkey", img: "turkey" },
     { es: "el tractor", en: "tractor", img: "tractor" },
-    { es: "el granjero", en: "farmer", img: "farmer" }
+    { es: "el granjero", en: "farmer", img: "farmer" },
+    { es: "el buey", en: "ox", img: "ox" }
   ]},
   { id: "pajaros_bichos", es: "Pájaros y bichos", en: "Birds and bugs", img: "butterfly", cards: [
     { es: "el pájaro", en: "bird", img: "bird" },
@@ -339,7 +344,8 @@ window.TOPICS = [
     { es: "reírse", en: "to laugh", img: "face-with-tears-of-joy" },
     { es: "llorar", en: "to cry", img: "loudly-crying-face" },
     { es: "pensar", en: "to think", img: "thinking-face" },
-    { es: "¡Silencio!", en: "Quiet!", img: "shushing-face" }
+    { es: "¡Silencio!", en: "Quiet!", img: "shushing-face" },
+    { es: "avergonzado", en: "embarrassed", img: "flushed-face" }
   ]},
   { id: "tiempo", es: "El tiempo", en: "Weather", img: "sun-behind-cloud", cards: [
     { es: "el sol", en: "sun", img: "sun" },
@@ -426,7 +432,8 @@ window.TOPICS = [
     { es: "la noria", en: "big wheel", img: "ferris-wheel" },
     { es: "la montaña rusa", en: "roller coaster", img: "roller-coaster" },
     { es: "la tienda de campaña", en: "tent", img: "tent" },
-    { es: "el mapa", en: "map", img: "world-map" }
+    { es: "el mapa", en: "map", img: "world-map" },
+    { es: "el museo", en: "museum", img: "classical-building" }
   ]},
   { id: "deportes", es: "Los deportes", en: "Sports", img: "soccer-ball", cards: [
     { es: "el fútbol", en: "football", img: "soccer-ball" },
@@ -478,7 +485,8 @@ window.TOPICS = [
     { es: "el micrófono", en: "microphone", img: "microphone" },
     { es: "los auriculares", en: "headphones", img: "headphone" },
     { es: "la radio", en: "radio", img: "radio" },
-    { es: "la nota musical", en: "musical note", img: "musical-note" }
+    { es: "la nota musical", en: "musical note", img: "musical-note" },
+    { es: "la partitura", en: "sheet music", img: "musical-score" }
   ]},
   { id: "clase", es: "La clase", en: "School", img: "books", cards: [
     { es: "los libros", en: "books", img: "books" },
@@ -536,7 +544,9 @@ window.TOPICS = [
     { es: "marrón", en: "brown", img: "brown-heart" },
     { es: "gris", en: "grey", img: "grey-heart" },
     { es: "negro", en: "black", img: "black-heart" },
-    { es: "blanco", en: "white", img: "white-heart" }
+    { es: "blanco", en: "white", img: "white-heart" },
+    { es: "dorado", en: "gold", img: "1st-place-medal" },
+    { es: "plateado", en: "silver", img: "2nd-place-medal" }
   ]},
   { id: "numeros", es: "Los números", en: "Numbers", img: "keycap-1", cards: [
     { es: "cero", en: "zero", img: "keycap-0" },
@@ -550,6 +560,8 @@ window.TOPICS = [
     { es: "ocho", en: "eight", img: "keycap-8" },
     { es: "nueve", en: "nine", img: "keycap-9" },
     { es: "diez", en: "ten", img: "keycap-10" },
-    { es: "cien", en: "a hundred", img: "hundred-points" }
+    { es: "cien", en: "a hundred", img: "hundred-points" },
+    { es: "más", en: "plus", img: "plus" },
+    { es: "menos", en: "minus", img: "minus" }
   ]}
 ];

@@ -135,6 +135,14 @@
   .box { width: 24px; height: 24px; border-radius: 7px; border: 1.5px solid var(--muted); display: grid; place-items: center; transition: background .15s, border-color .15s; }
   .topic.on .box { background: var(--accent); border-color: var(--accent); }
   .topic.on .box::after { content: ""; width: 10px; height: 6px; border: 2.2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px,-1px); }
+  .topic.some .box { border-color: var(--accent); }
+  .topic.some .box::after { content: ""; width: 10px; height: 2.2px; border-radius: 2px; background: var(--accent); }
+  .topic.sub { padding-left: 52px; grid-template-columns: 24px 32px 1fr auto; min-height: 52px; border-top-style: dashed; }
+  .topic.sub img { width: 32px; height: 32px; }
+  .topic.sub .box { width: 22px; height: 22px; }
+  .topic.sub .t-name { font-size: 15px; }
+  .topic.sub .t-name small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topic.sub .t-name { min-width: 0; }
   .t-name { font-size: 16px; font-weight: 500; line-height: 1.25; }
   .t-name small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); }
   .meter { text-align: right; font-size: 12px; color: var(--muted); white-space: nowrap; }
@@ -209,13 +217,33 @@
 <script src="cards.js"></script>
 <script>
 (function () {
-  const T = window.TOPICS || [];
+  // Big topics are split into evenly sized groups of 7-9 words (e.g. 25 words -> 9 + 8 + 8).
+  // If a size can't be split without dropping under 7, it keeps fewer, larger groups instead.
+  const MAX = 9, MIN = 7;
+  const TOPICS = window.TOPICS || [];
+  function split(t) {
+    const n = t.cards.length;
+    let k = Math.ceil(n / MAX);
+    while (k > 1 && Math.floor(n / k) < MIN) k--;
+    if (k === 1) return [{ ...t, parent: t, part: 0, of: 1 }];
+    const base = Math.floor(n / k), extra = n % k, out = [];
+    for (let i = 0, at = 0; i < k; i++) {
+      const size = base + (i < extra ? 1 : 0);
+      const cards = t.cards.slice(at, at += size);
+      out.push({ ...t, id: `${t.id}-${i + 1}`, es: `${t.es} ${i + 1}`, img: cards[0].img, cards, parent: t, part: i + 1, of: k });
+    }
+    return out;
+  }
+  const T = TOPICS.flatMap(split);   // the groups you pick from
   const ALL = T.flatMap(t => t.cards.map(c => ({ ...c, id: c.img, topic: t })));
   const KEY = "tarjetas-v1";
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
   const saved = load();
+  // A saved whole-topic id (from before groups, or after a regroup) selects all of that topic's groups.
+  const ids = new Set(T.map(t => t.id));
+  const restore = list => list.flatMap(id => ids.has(id) ? [id] : T.filter(g => g.parent.id === id).map(g => g.id));
   const S = {
-    selected: new Set(saved.selected || T.map(t => t.id)),   // first launch: every topic on
+    selected: new Set(saved.selected ? restore(saved.selected) : T.map(t => t.id)),   // first launch: every group on
     known: new Set(saved.known || []),
     dueOnly: !!saved.dueOnly, autoSay: saved.autoSay !== false, showEn: saved.showEn !== false,
     theme: saved.theme || null,
@@ -265,8 +293,11 @@
   }
   function renderTopBar() {
     const n = S.selected.size;
+    const on = T.filter(t => S.selected.has(t.id)), parents = new Set(on.map(t => t.parent));
+    const whole = on.length === (on[0] && on[0].of);
     $("topicsLabel").textContent = n === 0 ? "Pick topics" : n === T.length ? "All topics" :
-      n === 1 ? T.find(t => S.selected.has(t.id)).es : `${n} topics`;
+      n === 1 ? on[0].es : parents.size === 1 && whole ? on[0].parent.es :
+      parents.size === 1 ? `${on[0].parent.es} · ${n} groups` : `${parents.size} topics`;
   }
 
   /* ---------- card screen ---------- */
@@ -394,19 +425,26 @@
   const stateKey = () => [...S.selected].sort().join(",") + "|" + S.dueOnly;
   function renderSettings() {
     const list = $("topicList"); list.innerHTML = "";
-    T.forEach(t => {
-      const k = t.cards.filter(c => S.known.has(c.img)).length;
-      const on = S.selected.has(t.id);
+    const addRow = (cls, picture, name, sub, cards, groups) => {
+      const k = cards.filter(c => S.known.has(c.img)).length;
+      const n = groups.filter(g => S.selected.has(g.id)).length;
+      const on = n === groups.length, some = n > 0 && !on;
       const row = document.createElement("div");
-      row.className = "topic" + (on ? " on" : "");
-      row.setAttribute("role", "checkbox"); row.setAttribute("aria-checked", on); row.tabIndex = 0;
-      row.innerHTML = `<span class="box"></span><img src="${img(t.img)}" alt="" loading="lazy">
-        <span class="t-name" lang="es">${esc(t.es)}<small lang="en">${esc(t.en)}</small></span>
-        <span class="meter mono">${k}/${t.cards.length}<i><b style="width:${100 * k / t.cards.length}%"></b></i></span>`;
-      const toggle = () => { on ? S.selected.delete(t.id) : S.selected.add(t.id); persist(); renderSettings(); };
+      row.className = cls + (on ? " on" : some ? " some" : "");
+      row.setAttribute("role", "checkbox"); row.setAttribute("aria-checked", on ? "true" : some ? "mixed" : "false"); row.tabIndex = 0;
+      row.innerHTML = `<span class="box"></span><img src="${img(picture)}" alt="" loading="lazy">
+        <span class="t-name">${name}<small lang="en">${esc(sub)}</small></span>
+        <span class="meter mono">${k}/${cards.length}<i><b style="width:${100 * k / cards.length}%"></b></i></span>`;
+      const toggle = () => { groups.forEach(g => on ? S.selected.delete(g.id) : S.selected.add(g.id)); persist(); renderSettings(); };
       row.onclick = toggle;
       row.onkeydown = e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); } };
       list.appendChild(row);
+    };
+    TOPICS.forEach(p => {
+      const groups = T.filter(g => g.parent === p);
+      addRow("topic", p.img, `<span lang="es">${esc(p.es)}</span>`, groups.length > 1 ? `${p.en} · ${groups.length} groups` : p.en, p.cards, groups);
+      if (groups.length > 1) groups.forEach(g =>
+        addRow("topic sub", g.img, `<span lang="es">Grupo ${g.part}</span>`, g.cards.slice(0, 3).map(c => c.en).join(", ") + "…", g.cards, [g]));
     });
     document.querySelectorAll(".opt").forEach(o => o.classList.toggle("on", !!S[o.dataset.opt]));
     if (!canSay) document.querySelector('[data-opt="autoSay"]').hidden = true;
