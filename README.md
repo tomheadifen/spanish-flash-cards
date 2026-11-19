@@ -1,6 +1,7 @@
 # Tarjetas · Spanish flashcards
 
 Picture flashcards for Spain Spanish vocabulary: 504 words in 29 topics, split into groups of 7–9.
+Plus a **Frases** section for sentence mining: short sentences with one gap to fill.
 Live at **https://tomheadifen.github.io/spanish-flash-cards/**
 
 ## How it works
@@ -19,6 +20,17 @@ Tap the **Topics** button (top left) to choose which topics or groups to study a
 unlearned only, say the word when flipped, show English on the back, light/dark theme, reset progress.
 
 Keyboard on desktop: <kbd>Space</kbd> flip, <kbd>→</kbd>/<kbd>G</kbd> got it, <kbd>←</kbd>/<kbd>A</kbd> again, <kbd>S</kbd> skip, <kbd>P</kbd> say it, <kbd>T</kbd> topics, <kbd>Esc</kbd> close topics.
+
+## Frases (sentence mining)
+
+Switch between **Palabras** and **Frases** at the top of the screen (or press <kbd>M</kbd>).
+
+- **Front:** a short Spanish sentence with one gap, a hint (e.g. *beber, yo*) and the English meaning.
+- **Tap to flip:** the full sentence with the answer highlighted, plus a short note. The speaker reads the whole sentence.
+- Swiping, Got it / Again and topic picking work the same as the picture cards. Each section keeps its own progress.
+
+Sentences live in `sentences.js`. Add `{ es: "A veces ___ vino.", a: "bebo", hint: "beber, yo", en: "I sometimes drink wine.", note: "bebo = I drink" }`
+to a topic. `hint` and `note` are optional. Keep one gap (`___`) per sentence.
 
 ## Install as an app (PWA)
 
