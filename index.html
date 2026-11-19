@@ -61,6 +61,19 @@
   .progress { height: 4px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 10px 0 14px; }
   .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .3s ease; }
 
+  .modes { display: grid; grid-template-columns: 1fr 1fr; background: var(--chip); border-radius: 999px; padding: 3px; margin-bottom: 8px; }
+  .modes button { border: 0; background: none; border-radius: 999px; padding: 7px 10px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; }
+  .modes button.on { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
+
+  /* sentence cards */
+  .sbody { position: relative; flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 12px; padding: 0 4px; }
+  .sent { font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: clamp(26px, 7.5vw, 38px); line-height: 1.25; letter-spacing: -.01em; overflow-wrap: anywhere; }
+  .gap { display: inline-block; width: 3.2ch; border-bottom: 3px solid var(--accent); margin: 0 .12em; vertical-align: baseline; }
+  .ans { color: var(--accent); font-weight: 650; }
+  .s-hint { font-size: 15px; font-style: italic; color: var(--accent); }
+  .s-en { font-size: 16px; color: var(--muted); }
+  .s-note { font-size: 14px; color: var(--muted); background: var(--chip); border-radius: 12px; padding: 8px 12px; max-width: 34ch; }
+
   #stage { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .deck { flex: 1; min-height: 0; position: relative; perspective: 1600px; }
   .card { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .45s cubic-bezier(.2,.7,.2,1); cursor: pointer; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
@@ -174,6 +187,10 @@
 
 <!-- Flashcards: the app opens straight here -->
 <section id="study">
+  <div class="modes" role="tablist" aria-label="Card type">
+    <button role="tab" data-mode="words">Palabras</button>
+    <button role="tab" data-mode="sentences">Frases</button>
+  </div>
   <div class="bar">
     <button class="topics-btn" id="topicsBtn" aria-label="Choose topics and settings">
       <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="16" r="3"/></svg>
@@ -189,7 +206,7 @@
 <section id="settings" hidden>
   <div class="sheet">
     <div class="sheet-top">
-      <h1><small>Español de España</small>Topics</h1>
+      <h1><small>Español de España</small><span id="sheetTitle">Topics</span></h1>
       <button class="icon-btn" id="themeBtn" aria-label="Toggle light/dark theme">
         <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       </button>
@@ -215,12 +232,12 @@
 </section>
 
 <script src="cards.js"></script>
+<script src="sentences.js"></script>
 <script>
 (function () {
   // Big topics are split into evenly sized groups of 7-9 words (e.g. 25 words -> 9 + 8 + 8).
   // If a size can't be split without dropping under 7, it keeps fewer, larger groups instead.
   const MAX = 9, MIN = 7;
-  const TOPICS = window.TOPICS || [];
   function split(t) {
     const n = t.cards.length;
     let k = Math.ceil(n / MAX);
@@ -230,27 +247,48 @@
     for (let i = 0, at = 0; i < k; i++) {
       const size = base + (i < extra ? 1 : 0);
       const cards = t.cards.slice(at, at += size);
-      out.push({ ...t, id: `${t.id}-${i + 1}`, es: `${t.es} ${i + 1}`, img: cards[0].img, cards, parent: t, part: i + 1, of: k });
+      out.push({ ...t, id: `${t.id}-${i + 1}`, es: `${t.es} ${i + 1}`, img: cards[0].img || t.img, cards, parent: t, part: i + 1, of: k });
     }
     return out;
   }
-  const T = TOPICS.flatMap(split);   // the groups you pick from
-  const ALL = T.flatMap(t => t.cards.map(c => ({ ...c, id: c.img, topic: t })));
   const KEY = "tarjetas-v1";
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
   const saved = load();
-  // A saved whole-topic id (from before groups, or after a regroup) selects all of that topic's groups.
-  const ids = new Set(T.map(t => t.id));
-  const restore = list => list.flatMap(id => ids.has(id) ? [id] : T.filter(g => g.parent.id === id).map(g => g.id));
+  // Each mode (picture words / sentence mining) has its own topics, selection and learned progress.
+  function setup(topics, sel, known) {
+    const T = topics.flatMap(split);   // the groups you pick from
+    const ALL = T.flatMap(t => t.cards.map(c => ({ ...c, id: c.id || c.img, topic: t })));
+    // A saved whole-topic id (from before groups, or after a regroup) selects all of that topic's groups.
+    const ids = new Set(T.map(t => t.id));
+    const restore = list => list.flatMap(id => ids.has(id) ? [id] : T.filter(g => g.parent.id === id).map(g => g.id));
+    return { TOPICS: topics, T, ALL,
+      selected: new Set(sel ? restore(sel) : T.map(t => t.id)),   // first launch: every group on
+      known: new Set(known || []) };
+  }
+  const SENTENCES = window.SENTENCES || [];
+  SENTENCES.forEach(t => t.cards.forEach(c => { c.full = c.es.replace("___", c.a); c.id = "s:" + c.full; }));
+  const MODES = {
+    words: setup(window.TOPICS || [], saved.selected, saved.known),
+    sentences: setup(SENTENCES, saved.sSelected, saved.sKnown)
+  };
   const S = {
-    selected: new Set(saved.selected ? restore(saved.selected) : T.map(t => t.id)),   // first launch: every group on
-    known: new Set(saved.known || []),
+    mode: saved.mode === "sentences" ? "sentences" : "words",
     dueOnly: !!saved.dueOnly, autoSay: saved.autoSay !== false, showEn: saved.showEn !== false,
     theme: saved.theme || null,
     deck: [], i: 0, flipped: false, seen: 0, got: 0, again: 0
   };
+  Object.defineProperties(S, {
+    selected: { get: () => MODES[S.mode].selected },
+    known: { get: () => MODES[S.mode].known }
+  });
+  let TOPICS, T, ALL;
+  const useMode = m => { S.mode = m; ({ TOPICS, T, ALL } = MODES[m]); };
+  useMode(S.mode);
+  const unit = () => S.mode === "sentences" ? "sentence" : "word";
+  const spoken = c => c.full || c.es;
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({
-    selected: [...S.selected], known: [...S.known], dueOnly: S.dueOnly, autoSay: S.autoSay, showEn: S.showEn, theme: S.theme
+    selected: [...MODES.words.selected], known: [...MODES.words.known],
+    sSelected: [...MODES.sentences.selected], sKnown: [...MODES.sentences.known], mode: S.mode, dueOnly: S.dueOnly, autoSay: S.autoSay, showEn: S.showEn, theme: S.theme
   })); } catch (e) {} };
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
@@ -315,7 +353,7 @@
       stage.innerHTML = `<div class="done">
           <img src="${img(none ? "books" : allKnown ? "trophy" : "party-popper")}" alt="">
           <h2>${none ? "No topics" : allKnown ? "¡Todo aprendido!" : "¡Muy bien!"}</h2>
-          <p>${none ? "Choose at least one topic to study." : allKnown ? "You've learned every word in these topics." : `${S.got} got it · ${S.again} needed another look`}</p>
+          <p>${none ? "Choose at least one topic to study." : allKnown ? "You've learned every ${unit()} in these topics." : `${S.got} got it · ${S.again} needed another look`}</p>
           ${none ? "" : `<button class="big" id="goAgain">${allKnown ? "Review them all" : "Go again"}</button>`}
           <button class="pill" id="goTopics">Change topics</button></div>`;
       if ($("goAgain")) $("goAgain").onclick = () => { if (allKnown && S.dueOnly) { S.dueOnly = false; persist(); } build(); };
@@ -323,22 +361,32 @@
       return;
     }
     const c = S.deck[S.i];
-    const long = c.es.replace(/^(el|la|los|las)\s+/i, "").length > 11;
     const tag = `<div class="tag">${esc(c.topic.es)}${S.known.has(c.id) ? ' · <span class="known">✓ learned</span>' : ""}</div>`;
     const stamps = `<span class="stamp got">Got it</span><span class="stamp again">Again</span>`;
+    const sayBtn = canSay ? `<button class="say" id="sayBtn" aria-label="Say it"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>` : "";
+    let front, back;
+    if (S.mode === "sentences") {
+      const [pre, post = ""] = c.es.split("___");
+      front = `<div class="sbody"><div class="sent" lang="es">${esc(pre)}<span class="gap" aria-label="blank"></span>${esc(post)}</div>
+          ${c.hint ? `<div class="s-hint" lang="es">(${esc(c.hint)})</div>` : ""}<div class="s-en">${esc(c.en)}</div></div>
+        <div class="hint">Tap to see the answer</div>`;
+      back = `<div class="sbody"><div class="sent" lang="es">${esc(pre)}<b class="ans">${esc(c.a)}</b>${esc(post)}</div>
+          ${S.showEn ? `<div class="s-en">${esc(c.en)}</div>` : ""}${c.note ? `<div class="s-note">${esc(c.note)}</div>` : ""}</div>
+        <div class="hint">Tap to flip back</div>${sayBtn}`;
+    } else {
+      const long = c.es.replace(/^(el|la|los|las)\s+/i, "").length > 11;
+      front = `<div class="pic"><img src="${img(c.img)}" alt="What is this in Spanish?" draggable="false"></div>
+        <div class="hint">Tap to see the word</div>`;
+      back = `<div class="pic"><img src="${img(c.img)}" alt="" draggable="false">
+          <div class="word"><div class="es${long ? " long" : ""}" lang="es">${splitArticle(c.es)}</div>${S.showEn ? `<div class="en">${esc(c.en)}</div>` : ""}</div>
+        </div>
+        <div class="hint">Tap to flip back</div>${sayBtn}`;
+    }
     stage.innerHTML = `
       <div class="deck">
         <div class="card${S.flipped ? " flipped" : ""}" id="card" aria-live="polite">
-          <div class="face front">${stamps}${tag}
-            <div class="pic"><img src="${img(c.img)}" alt="What is this in Spanish?" draggable="false"></div>
-            <div class="hint">Tap to see the word</div></div>
-          <div class="face back">${stamps}${tag}
-            <div class="pic"><img src="${img(c.img)}" alt="" draggable="false">
-              <div class="word"><div class="es${long ? " long" : ""}" lang="es">${splitArticle(c.es)}</div>${S.showEn ? `<div class="en">${esc(c.en)}</div>` : ""}</div>
-            </div>
-            <div class="hint">Tap to flip back</div>
-            ${canSay ? `<button class="say" id="sayBtn" aria-label="Say it"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>` : ""}
-          </div>
+          <div class="face front">${stamps}${tag}${front}</div>
+          <div class="face back">${stamps}${tag}${back}</div>
         </div>
       </div>
       <div class="actions">
@@ -352,14 +400,14 @@
     $("sBtn").onclick = () => advance("skip");
     if ($("sayBtn")) {
       $("sayBtn").addEventListener("pointerdown", e => e.stopPropagation());
-      $("sayBtn").onclick = e => { e.stopPropagation(); say(c.es); };
+      $("sayBtn").onclick = e => { e.stopPropagation(); say(spoken(c)); };
     }
     attachSwipe($("card"));
-    const nx = S.deck[S.i + 1]; if (nx) new Image().src = img(nx.img);   // preload the next picture
+    const nx = S.deck[S.i + 1]; if (nx && nx.img) new Image().src = img(nx.img);   // preload the next picture
   }
   function flip() {
     S.flipped = !S.flipped; $("card").classList.toggle("flipped", S.flipped);
-    if (S.flipped && S.autoSay) say(S.deck[S.i].es);
+    if (S.flipped && S.autoSay) say(spoken(S.deck[S.i]));
   }
 
   let busy = false;
@@ -426,7 +474,7 @@
   function renderSettings() {
     const list = $("topicList"); list.innerHTML = "";
     const addRow = (cls, picture, name, sub, cards, groups) => {
-      const k = cards.filter(c => S.known.has(c.img)).length;
+      const k = cards.filter(c => S.known.has(c.id || c.img)).length;
       const n = groups.filter(g => S.selected.has(g.id)).length;
       const on = n === groups.length, some = n > 0 && !on;
       const row = document.createElement("div");
@@ -449,7 +497,8 @@
     document.querySelectorAll(".opt").forEach(o => o.classList.toggle("on", !!S[o.dataset.opt]));
     if (!canSay) document.querySelector('[data-opt="autoSay"]').hidden = true;
     const p = pool(), n = S.dueOnly ? p.filter(c => !S.known.has(c.id)).length : p.length;
-    $("doneCount").textContent = S.selected.size ? plural(n, "word") : "pick a topic";
+    $("doneCount").textContent = S.selected.size ? plural(n, unit()) : "pick a topic";
+    $("sheetTitle").textContent = S.mode === "sentences" ? "Frases" : "Topics";
     $("doneBtn").disabled = S.selected.size === 0;
   }
   document.querySelectorAll(".opt").forEach(o => o.onclick = () => { S[o.dataset.opt] = !S[o.dataset.opt]; persist(); renderSettings(); });
@@ -481,9 +530,18 @@
     else if (k === "arrowright" || k === "g") advance("got");
     else if (k === "arrowleft" || k === "a") advance("again");
     else if (k === "s") advance("skip");
-    else if (k === "p" && S.deck[S.i]) say(S.deck[S.i].es);
+    else if (k === "p" && S.deck[S.i]) say(spoken(S.deck[S.i]));
+    else if (k === "m") switchMode(S.mode === "words" ? "sentences" : "words");
     else if (k === "t") openSettings();
   });
+
+  /* ---------- Palabras / Frases switch ---------- */
+  const renderModes = () => document.querySelectorAll(".modes button").forEach(b => {
+    const on = b.dataset.mode === S.mode; b.classList.toggle("on", on); b.setAttribute("aria-selected", on);
+  });
+  function switchMode(m) { if (m === S.mode) return; useMode(m); persist(); renderModes(); build(); }
+  document.querySelectorAll(".modes button").forEach(b => b.onclick = () => switchMode(b.dataset.mode));
+  renderModes();
 
   build();
 
