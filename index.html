@@ -288,9 +288,7 @@
     <div class="sec">Options</div>
     <div class="group">
       <div class="opt" data-opt="dueOnly"><div class="opt-txt">Unlearned only<small>Hide words you've marked "Got it"</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Turn off to mute everything</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="autoSay"><div class="opt-txt">Read aloud automatically<small>When a card flips or you get a verb right</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="showEn"><div class="opt-txt">Show English<small>Small translation under the Spanish</small></div><div class="switch"></div></div>
+      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Reads each word aloud. Turn off to mute.</small></div><div class="switch"></div></div>
     </div>
     <button class="reset" id="resetBtn">Reset learned progress</button>
     <p class="note">Progress is saved on this device.</p>
@@ -305,9 +303,7 @@
     <div class="vpop-top"><h2>Ajustes<small>Settings</small></h2>
       <button class="icon-btn" id="prefsX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="group" style="margin-top:16px">
-      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Turn off to mute everything</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="autoSay"><div class="opt-txt">Read aloud automatically<small>When a card flips or you get a verb right</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="showEn"><div class="opt-txt">Show English<small>Small translation under the Spanish</small></div><div class="switch"></div></div>
+      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Reads each word aloud. Turn off to mute.</small></div><div class="switch"></div></div>
     </div>
     <p class="note" id="noVoice" hidden>Your browser can't speak, so there's no sound to turn on.</p>
   </div>
@@ -488,7 +484,7 @@ window.VERB_ENGINE = (function () {
   const MODE_ORDER = ["words", "sentences", "verbs"];
   const S = {
     mode: MODE_ORDER.includes(saved.mode) ? saved.mode : "words",
-    dueOnly: !!saved.dueOnly, autoSay: saved.autoSay !== false, sound: saved.sound !== false, showEn: saved.showEn !== false,
+    dueOnly: !!saved.dueOnly, autoSay: true, sound: saved.sound !== false, showEn: true,   // sound on = read aloud; English always shown
     theme: saved.theme || null,
     deck: [], i: 0, flipped: false, seen: 0, got: 0, again: 0
   };
@@ -850,8 +846,7 @@ window.VERB_ENGINE = (function () {
   }
   function renderOpts() {
     document.querySelectorAll(".opt").forEach(o => o.classList.toggle("on", !!S[o.dataset.opt]));
-    document.querySelectorAll('[data-opt="autoSay"]').forEach(o => o.classList.toggle("dim", !S.sound));
-    if (!canSay) { document.querySelectorAll('[data-opt="autoSay"], [data-opt="sound"]').forEach(o => o.hidden = true); $("noVoice").hidden = false; }
+    if (!canSay) { document.querySelectorAll('[data-opt="sound"]').forEach(o => o.hidden = true); $("noVoice").hidden = false; }
     $("mutedDot").hidden = !canSay || S.sound;
     $("prefsBtn").setAttribute("aria-label", canSay && !S.sound ? "Settings (sound off)" : "Settings");
   }
@@ -860,7 +855,7 @@ window.VERB_ENGINE = (function () {
     S[k] = !S[k]; persist();
     if (k === "sound" && !S.sound && canSay) speechSynthesis.cancel();
     if (!$("settings").hidden) renderSettings(); else renderOpts();
-    if (!$("prefs").hidden && (k === "sound" || k === "showEn")) prefsChanged = true;
+    if (!$("prefs").hidden && k === "sound") prefsChanged = true;
   });
   // Settings pop-up: open from the gear on any tab, close with ✕, tapping outside, Esc or back.
   let prefsChanged = false;
