@@ -102,6 +102,11 @@
   .vrule .q { width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; text-transform: none; }
   .vrule .known { color: var(--good); }
   .vrule:active { transform: scale(.97); }
+  .set-btn { margin-left: 0; position: relative; }
+  .muted-dot { position: absolute; right: -6px; bottom: -6px; font-size: 14px; line-height: 1; }
+  .opt.dim { opacity: .45; pointer-events: none; }
+  #prefs { position: fixed; inset: 0; z-index: 30; display: flex; align-items: flex-end; justify-content: center; background: rgba(20,14,8,.45); animation: fade .2s; }
+  #prefs[hidden] { display: none; }
   #vpop { position: fixed; inset: 0; z-index: 30; display: flex; align-items: flex-end; justify-content: center; background: rgba(20,14,8,.45); animation: fade .2s; }
   @keyframes fade { from { opacity: 0; } }
   .vpop { width: 100%; max-width: 560px; max-height: 92dvh; overflow-y: auto; background: var(--bg); border-radius: 26px 26px 0 0;
@@ -255,6 +260,10 @@
       <span id="topicsLabel">Topics</span>
     </button>
     <span class="count mono" id="count"></span>
+    <button class="icon-btn set-btn" id="prefsBtn" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <span class="muted-dot" id="mutedDot" hidden aria-hidden="true">🔇</span>
+    </button>
   </div>
   <div class="progress"><div id="progress"></div></div>
   <div id="stage"></div>
@@ -279,8 +288,9 @@
     <div class="sec">Options</div>
     <div class="group">
       <div class="opt" data-opt="dueOnly"><div class="opt-txt">Unlearned only<small>Hide words you've marked "Got it"</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="autoSay"><div class="opt-txt">Say the word when flipped<small>Uses your phone's Spanish (Spain) voice</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="showEn"><div class="opt-txt">Show English on the back<small>Small translation under the Spanish</small></div><div class="switch"></div></div>
+      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Turn off to mute everything</small></div><div class="switch"></div></div>
+      <div class="opt" data-opt="autoSay"><div class="opt-txt">Read aloud automatically<small>When a card flips or you get a verb right</small></div><div class="switch"></div></div>
+      <div class="opt" data-opt="showEn"><div class="opt-txt">Show English<small>Small translation under the Spanish</small></div><div class="switch"></div></div>
     </div>
     <button class="reset" id="resetBtn">Reset learned progress</button>
     <p class="note">Progress is saved on this device.</p>
@@ -288,6 +298,20 @@
   </div>
   <div class="dock"><button class="big" id="doneBtn"><b>Back to cards</b><span id="doneCount"></span></button></div>
 </section>
+
+<!-- Settings pop-up (gear button, every tab) -->
+<div id="prefs" hidden>
+  <div class="vpop" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="vpop-top"><h2>Ajustes<small>Settings</small></h2>
+      <button class="icon-btn" id="prefsX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="group" style="margin-top:16px">
+      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Turn off to mute everything</small></div><div class="switch"></div></div>
+      <div class="opt" data-opt="autoSay"><div class="opt-txt">Read aloud automatically<small>When a card flips or you get a verb right</small></div><div class="switch"></div></div>
+      <div class="opt" data-opt="showEn"><div class="opt-txt">Show English<small>Small translation under the Spanish</small></div><div class="switch"></div></div>
+    </div>
+    <p class="note" id="noVoice" hidden>Your browser can't speak, so there's no sound to turn on.</p>
+  </div>
+</div>
 
 <!-- Verb rule pop-up (Verbos tab) -->
 <div id="vpop" hidden></div>
@@ -464,7 +488,7 @@ window.VERB_ENGINE = (function () {
   const MODE_ORDER = ["words", "sentences", "verbs"];
   const S = {
     mode: MODE_ORDER.includes(saved.mode) ? saved.mode : "words",
-    dueOnly: !!saved.dueOnly, autoSay: saved.autoSay !== false, showEn: saved.showEn !== false,
+    dueOnly: !!saved.dueOnly, autoSay: saved.autoSay !== false, sound: saved.sound !== false, showEn: saved.showEn !== false,
     theme: saved.theme || null,
     deck: [], i: 0, flipped: false, seen: 0, got: 0, again: 0
   };
@@ -480,7 +504,7 @@ window.VERB_ENGINE = (function () {
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({
     selected: [...MODES.words.selected], known: [...MODES.words.known],
     sSelected: [...MODES.sentences.selected], sKnown: [...MODES.sentences.known],
-    vSelected: [...MODES.verbs.selected], vKnown: [...MODES.verbs.known], mode: S.mode, dueOnly: S.dueOnly, autoSay: S.autoSay, showEn: S.showEn, theme: S.theme
+    vSelected: [...MODES.verbs.selected], vKnown: [...MODES.verbs.known], mode: S.mode, dueOnly: S.dueOnly, autoSay: S.autoSay, sound: S.sound, showEn: S.showEn, theme: S.theme
   })); } catch (e) {} };
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
@@ -504,7 +528,7 @@ window.VERB_ENGINE = (function () {
   };
   if (canSay) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
   function say(text) {
-    if (!canSay) return;
+    if (!canSay || !S.sound) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text.replace(/[¡!¿?]/g, ""));
     u.lang = "es-ES"; if (esVoice) u.voice = esVoice; u.rate = 0.9;
@@ -556,7 +580,7 @@ window.VERB_ENGINE = (function () {
     const c = S.deck[S.i];
     const tag = `<div class="tag">${esc(c.topic.es)}${S.known.has(c.id) ? ' · <span class="known">✓ learned</span>' : ""}</div>`;
     const stamps = `<span class="stamp got">Got it</span><span class="stamp again">Again</span>`;
-    const sayBtn = canSay ? `<button class="say" id="sayBtn" aria-label="Say it"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>` : "";
+    const sayBtn = canSay && S.sound ? `<button class="say" id="sayBtn" aria-label="Say it"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>` : "";
     let front, back;
     if (S.mode === "sentences") {
       const [pre, post = ""] = c.es.split("___");
@@ -818,14 +842,41 @@ window.VERB_ENGINE = (function () {
       if (groups.length > 1) groups.forEach(g =>
         addRow("topic sub", g.img, `<span lang="es">Grupo ${g.part}</span>`, g.cards.slice(0, 3).map(c => c.en).join(", ") + "…", g.cards, [g]));
     });
-    document.querySelectorAll(".opt").forEach(o => o.classList.toggle("on", !!S[o.dataset.opt]));
-    if (!canSay) document.querySelector('[data-opt="autoSay"]').hidden = true;
+    renderOpts();
     const p = pool(), n = S.dueOnly ? p.filter(c => !S.known.has(c.id)).length : p.length;
     $("doneCount").textContent = S.selected.size ? plural(n, unit()) : "pick a topic";
     $("sheetTitle").textContent = ({ words: "Topics", sentences: "Frases", verbs: "Verbos" })[S.mode];
     $("doneBtn").disabled = S.selected.size === 0;
   }
-  document.querySelectorAll(".opt").forEach(o => o.onclick = () => { S[o.dataset.opt] = !S[o.dataset.opt]; persist(); renderSettings(); });
+  function renderOpts() {
+    document.querySelectorAll(".opt").forEach(o => o.classList.toggle("on", !!S[o.dataset.opt]));
+    document.querySelectorAll('[data-opt="autoSay"]').forEach(o => o.classList.toggle("dim", !S.sound));
+    if (!canSay) { document.querySelectorAll('[data-opt="autoSay"], [data-opt="sound"]').forEach(o => o.hidden = true); $("noVoice").hidden = false; }
+    $("mutedDot").hidden = !canSay || S.sound;
+    $("prefsBtn").setAttribute("aria-label", canSay && !S.sound ? "Settings (sound off)" : "Settings");
+  }
+  document.querySelectorAll(".opt").forEach(o => o.onclick = () => {
+    const k = o.dataset.opt;
+    S[k] = !S[k]; persist();
+    if (k === "sound" && !S.sound && canSay) speechSynthesis.cancel();
+    if (!$("settings").hidden) renderSettings(); else renderOpts();
+    if (!$("prefs").hidden && (k === "sound" || k === "showEn")) prefsChanged = true;
+  });
+  // Settings pop-up: open from the gear on any tab, close with ✕, tapping outside, Esc or back.
+  let prefsChanged = false;
+  function openPrefs() {
+    prefsChanged = false; renderOpts();
+    $("prefs").hidden = false;
+    history.pushState({ v: "prefs" }, "", "#settings");
+  }
+  function closedPrefs() {
+    $("prefs").hidden = true;
+    if (prefsChanged && S.mode !== "verbs") renderStudy();   // redraw the card (speaker button / English); a verb question keeps its tiles
+  }
+  function closePrefs() { if ($("prefs").hidden) return; history.state && history.state.v === "prefs" ? history.back() : closedPrefs(); }
+  $("prefsBtn").onclick = openPrefs;
+  $("prefsX").onclick = closePrefs;
+  $("prefs").onclick = e => { if (e.target.id === "prefs") closePrefs(); };
   $("allBtn").onclick = () => { T.forEach(t => S.selected.add(t.id)); persist(); renderSettings(); };
   $("noneBtn").onclick = () => { S.selected.clear(); persist(); renderSettings(); };
   $("resetBtn").onclick = () => { if (confirm("Clear all 'Got it' progress?")) { S.known.clear(); persist(); renderSettings(); snapshot = ""; } };
@@ -844,6 +895,7 @@ window.VERB_ENGINE = (function () {
   $("topicsBtn").onclick = openSettings;
   $("doneBtn").onclick = () => { history.state && history.state.v === "settings" ? history.back() : closedSettings(); };
   addEventListener("popstate", () => {
+    if (!$("prefs").hidden) { closedPrefs(); return; }
     if (!$("vpop").hidden) { $("vpop").hidden = true; return; }
     if (!$("settings").hidden) closedSettings();
   });
@@ -851,6 +903,7 @@ window.VERB_ENGINE = (function () {
 
   addEventListener("keydown", e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!$("prefs").hidden) { if (e.key === "Escape") closePrefs(); return; }
     if (!$("vpop").hidden) { if (e.key === "Escape") closeRule(); return; }
     if (!$("settings").hidden) { if (e.key === "Escape") $("doneBtn").click(); return; }
     const k = e.key.toLowerCase();
@@ -880,6 +933,7 @@ window.VERB_ENGINE = (function () {
   document.querySelectorAll(".modes button").forEach(b => b.onclick = () => switchMode(b.dataset.mode));
   renderModes();
 
+  renderOpts();
   build();
 
   /* ---------- PWA: offline support + install button (Android/desktop Chrome) ---------- */
