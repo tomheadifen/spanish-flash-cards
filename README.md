@@ -42,10 +42,12 @@ Drag the verb onto the right form (or tap it).
 - Of the 7 wrong answers, 6 are fakes built from real learner mistakes (no stem change: *penso*; a stem change
   where there shouldn't be one: *piensamos*; wrong ending family: *comas*; spelling slips: *comu*) and 1 is a real
   form for a different person, so you have to pick the right person too.
-- A verb counts as learned when you get it right first time. Keys on desktop: <kbd>1</kbd>–<kbd>8</kbd> pick a tile, <kbd>S</kbd> skip.
+- **Tap the rule at the top** (e.g. *Bota · e → ie*, *Sombrero + bota*) for a pop-up that explains it the way the class notes do, with the verb's six forms laid out yo | nosotros, tú | vosotros, él | ellos and the irregular ones highlighted (you can see the boot or the hat). Peeking means that verb doesn't count as learned this round.
+- A verb counts as learned when you get it right first time. Keys on desktop: <kbd>1</kbd>–<kbd>8</kbd> pick a tile, <kbd>R</kbd> rule, <kbd>S</kbd> skip.
 
 Verbs live in `verbs.js`, grouped by type. Add `{ v: "hablar", en: "to speak" }` for a regular verb, or add
-`f: "pienso piensas piensa pensamos pensáis piensan"` (yo → ellos) for an irregular one.
+`f: "pienso piensas piensa pensamos pensáis piensan"` (yo → ellos) for an irregular one. Optional `r` sets the rule when
+it differs from the topic (e.g. `r: "sb-ie"` for tener) and `q` adds a quirk to the pop-up.
 
 ## Install as an app (PWA)
 

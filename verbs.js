@@ -4,6 +4,8 @@
 //   en: English meaning
 //   f:  the six present-tense forms (yo, tú, él, nosotros, vosotros, ellos), space separated.
 //       Leave f out for fully regular verbs: the app builds the forms from the -ar / -er / -ir endings.
+//   r:  optional rule type, when it's not the topic's usual one (see RULES in index.html)
+//   q:  optional quirk, shown under the rule in the pop-up
 // Wrong answers ("fakes") are generated automatically from common mistakes.
 // img on a topic is a file in images/ (without .webp), used in the Topics list.
 window.VERBS = [
@@ -20,7 +22,7 @@ window.VERBS = [
     { v: "pagar", en: "to pay" }, { v: "pintar", en: "to paint" }, { v: "visitar", en: "to visit" },
     { v: "cambiar", en: "to change" }, { v: "entrar", en: "to go in" }, { v: "pasear", en: "to go for a walk" },
     { v: "pescar", en: "to fish" }, { v: "silbar", en: "to whistle" }, { v: "pasar", en: "to spend (time)" },
-    { v: "esquiar", en: "to ski", f: "esquío esquías esquía esquiamos esquiáis esquían" }
+    { v: "esquiar", en: "to ski", f: "esquío esquías esquía esquiamos esquiáis esquían", q: "Regular endings, but the í takes an accent: esquío, esquías… Nosotros and vosotros don't." }
   ]},
   { id: "v-er", es: "Regulares -er", en: "Regular -er verbs", img: "fork-and-knife", cards: [
     { v: "comer", en: "to eat" }, { v: "beber", en: "to drink" }, { v: "aprender", en: "to learn" },
@@ -62,21 +64,21 @@ window.VERBS = [
     { v: "volar", en: "to fly", f: "vuelo vuelas vuela volamos voláis vuelan" },
     { v: "mover", en: "to move", f: "muevo mueves mueve movemos movéis mueven" },
     { v: "morir", en: "to die", f: "muero mueres muere morimos morís mueren" },
-    { v: "jugar", en: "to play (u → ue)", f: "juego juegas juega jugamos jugáis juegan" },
+    { v: "jugar", en: "to play (u → ue)", f: "juego juegas juega jugamos jugáis juegan", r: "u-ue", q: "The only u → ue verb. Jugar al + sport: juego al tenis." },
     { v: "colgar", en: "to hang (up)", f: "cuelgo cuelgas cuelga colgamos colgáis cuelgan" },
     { v: "soler", en: "to usually (do)", f: "suelo sueles suele solemos soléis suelen" }
   ]},
   { id: "v-i", es: "Cambio e → i", en: "e → i stem change", img: "face-with-tears-of-joy", cards: [
     { v: "repetir", en: "to repeat", f: "repito repites repite repetimos repetís repiten" },
     { v: "pedir", en: "to ask for / order", f: "pido pides pide pedimos pedís piden" },
-    { v: "seguir", en: "to follow / continue", f: "sigo sigues sigue seguimos seguís siguen" },
-    { v: "conseguir", en: "to get / achieve", f: "consigo consigues consigue conseguimos conseguís consiguen" },
-    { v: "corregir", en: "to correct", f: "corrijo corriges corrige corregimos corregís corrigen" },
-    { v: "elegir", en: "to choose", f: "elijo eliges elige elegimos elegís eligen" },
+    { v: "seguir", en: "to follow / continue", f: "sigo sigues sigue seguimos seguís siguen", q: "Yo drops the u: sigo (gu → g). The u in gue / gui is silent anyway." },
+    { v: "conseguir", en: "to get / achieve", f: "consigo consigues consigue conseguimos conseguís consiguen", q: "Like seguir: yo drops the u: consigo." },
+    { v: "corregir", en: "to correct", f: "corrijo corriges corrige corregimos corregís corrigen", q: "Yo: g → j (corrijo) to keep the soft \"h\" sound before o." },
+    { v: "elegir", en: "to choose", f: "elijo eliges elige elegimos elegís eligen", q: "Yo: g → j (elijo) to keep the soft \"h\" sound before o." },
     { v: "despedir", en: "to dismiss / say goodbye", f: "despido despides despide despedimos despedís despiden" },
     { v: "servir", en: "to serve", f: "sirvo sirves sirve servimos servís sirven" },
-    { v: "reír", en: "to laugh", f: "río ríes ríe reímos reís ríen" },
-    { v: "sonreír", en: "to smile", f: "sonrío sonríes sonríe sonreímos sonreís sonríen" },
+    { v: "reír", en: "to laugh", f: "río ríes ríe reímos reís ríen", q: "The stem is just r-, so e → i leaves rí-. Keep the accent: río, ríes, ríe, ríen." },
+    { v: "sonreír", en: "to smile", f: "sonrío sonríes sonríe sonreímos sonreís sonríen", q: "Like reír: sonrío, sonríes, sonríe… Keep the accent." },
     { v: "vestir", en: "to dress / wear", f: "visto vistes viste vestimos vestís visten" },
     { v: "medir", en: "to measure", f: "mido mides mide medimos medís miden" },
     { v: "impedir", en: "to prevent", f: "impido impides impide impedimos impedís impiden" }
@@ -84,26 +86,26 @@ window.VERBS = [
   { id: "v-yo", es: "Yo especial", en: "Special yo form", img: "womans-hat", cards: [
     { v: "hacer", en: "to do / make", f: "hago haces hace hacemos hacéis hacen" },
     { v: "poner", en: "to put", f: "pongo pones pone ponemos ponéis ponen" },
-    { v: "traer", en: "to bring", f: "traigo traes trae traemos traéis traen" },
+    { v: "traer", en: "to bring", f: "traigo traes trae traemos traéis traen", q: "Yo adds -ig-: traigo." },
     { v: "salir", en: "to leave / go out", f: "salgo sales sale salimos salís salen" },
-    { v: "oír", en: "to hear", f: "oigo oyes oye oímos oís oyen" },
+    { v: "oír", en: "to hear", f: "oigo oyes oye oímos oís oyen", q: "Yo is oigo. Also i → y in tú, él and ellos: oyes, oye, oyen." },
     { v: "conocer", en: "to know (people, places)", f: "conozco conoces conoce conocemos conocéis conocen" },
     { v: "conducir", en: "to drive", f: "conduzco conduces conduce conducimos conducís conducen" },
     { v: "traducir", en: "to translate", f: "traduzco traduces traduce traducimos traducís traducen" },
     { v: "agradecer", en: "to thank", f: "agradezco agradeces agradece agradecemos agradecéis agradecen" },
     { v: "ofrecer", en: "to offer", f: "ofrezco ofreces ofrece ofrecemos ofrecéis ofrecen" },
     { v: "parecer", en: "to seem / look like", f: "parezco pareces parece parecemos parecéis parecen" },
-    { v: "dar", en: "to give", f: "doy das da damos dais dan" },
-    { v: "estar", en: "to be (states, place)", f: "estoy estás está estamos estáis están" },
-    { v: "saber", en: "to know (facts, how to)", f: "sé sabes sabe sabemos sabéis saben" },
-    { v: "ver", en: "to see / watch", f: "veo ves ve vemos veis ven" },
-    { v: "coger", en: "to take / grab", f: "cojo coges coge cogemos cogéis cogen" }
+    { v: "dar", en: "to give", f: "doy das da damos dais dan", q: "Yo ends in -oy. Vosotros dais has no accent." },
+    { v: "estar", en: "to be (states, place)", f: "estoy estás está estamos estáis están", q: "Yo ends in -oy. Note the accents: estás, está, estáis, están." },
+    { v: "saber", en: "to know (facts, how to)", f: "sé sabes sabe sabemos sabéis saben", q: "Yo is sé, with an accent (se without one is a different word)." },
+    { v: "ver", en: "to see / watch", f: "veo ves ve vemos veis ven", q: "Yo keeps the e: veo. Vosotros veis has no accent." },
+    { v: "coger", en: "to take / grab", f: "cojo coges coge cogemos cogéis cogen", q: "Only a spelling change: g → j before o, so it keeps the same sound." }
   ]},
   { id: "v-irr", es: "Muy irregulares", en: "Very irregular", img: "footprints", cards: [
-    { v: "ser", en: "to be", f: "soy eres es somos sois son" },
-    { v: "ir", en: "to go", f: "voy vas va vamos vais van" },
-    { v: "tener", en: "to have", f: "tengo tienes tiene tenemos tenéis tienen" },
-    { v: "venir", en: "to come", f: "vengo vienes viene venimos venís vienen" },
-    { v: "decir", en: "to say / tell", f: "digo dices dice decimos decís dicen" }
+    { v: "ser", en: "to be", f: "soy eres es somos sois son", r: "irregular" },
+    { v: "ir", en: "to go", f: "voy vas va vamos vais van", r: "irregular", q: "Every form starts with v-, and the endings look like -ar: vas, va, vamos, vais, van." },
+    { v: "tener", en: "to have", f: "tengo tienes tiene tenemos tenéis tienen", r: "sb-ie" },
+    { v: "venir", en: "to come", f: "vengo vienes viene venimos venís vienen", r: "sb-ie" },
+    { v: "decir", en: "to say / tell", f: "digo dices dice decimos decís dicen", r: "sb-i" }
   ]}
 ];
