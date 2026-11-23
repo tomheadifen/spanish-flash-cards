@@ -4,13 +4,14 @@
 // - Pictures: saved once and then served from the phone. On install, every picture
 //   listed in cards.js is downloaded so the whole deck works offline from day one.
 // If you change the list of app files below, bump APP.
-const APP = "tarjetas-app-v3";
+const APP = "tarjetas-app-v4";
 const IMG = "tarjetas-img-v1";
 const SHELL = [
   "./",
   "./index.html",
   "./cards.js",
   "./sentences.js",
+  "./verbs.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -19,7 +20,7 @@ const SHELL = [
 ];
 
 async function cacheAllPictures() {
-  const files = await Promise.all(["./cards.js", "./sentences.js"].map(f =>
+  const files = await Promise.all(["./cards.js", "./sentences.js", "./verbs.js"].map(f =>
     fetch(f, { cache: "no-cache" }).then(r => r.text()).catch(() => "")));
   const src = files.join("\n");
   const names = [...new Set([...src.matchAll(/img:\s*"([^"]+)"/g)].map(m => m[1]))];

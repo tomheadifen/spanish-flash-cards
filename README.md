@@ -1,7 +1,7 @@
 # Tarjetas · Spanish flashcards
 
 Picture flashcards for Spain Spanish vocabulary: 504 words in 29 topics, split into groups of 7–9.
-Plus a **Frases** section for sentence mining: short sentences with one gap to fill.
+Plus a **Frases** section for sentence mining (short sentences with one gap to fill) and a **Verbos** section for drag-and-drop conjugation practice.
 Live at **https://tomheadifen.github.io/spanish-flash-cards/**
 
 ## How it works
@@ -23,7 +23,7 @@ Keyboard on desktop: <kbd>Space</kbd> flip, <kbd>→</kbd>/<kbd>G</kbd> got it, 
 
 ## Frases (sentence mining)
 
-Switch between **Palabras** and **Frases** at the top of the screen (or press <kbd>M</kbd>).
+Switch between **Palabras**, **Frases** and **Verbos** at the top of the screen (or press <kbd>M</kbd>).
 
 - **Front:** a short Spanish sentence with one gap, a hint (e.g. *beber, yo*) and the English meaning.
 - **Tap to flip:** the full sentence with the answer highlighted, plus a short note. The speaker reads the whole sentence.
@@ -31,6 +31,21 @@ Switch between **Palabras** and **Frases** at the top of the screen (or press <k
 
 Sentences live in `sentences.js`. Add `{ es: "A veces ___ vino.", a: "bebo", hint: "beber, yo", en: "I sometimes drink wine.", note: "bebo = I drink" }`
 to a topic. `hint` and `note` are optional. Keep one gap (`___`) per sentence.
+
+## Verbos (conjugation practice)
+
+The third tab. A verb and a person sit in the middle of the screen (e.g. **comer** *yo*), with 8 answers around it.
+Drag the verb onto the right form (or tap it).
+
+- **Wrong:** the tile shakes and is crossed out, and the verb springs back. Keep trying until you get it.
+- **Right:** a cheer, sparkles and the phone says the form (*yo como*), then the next verb.
+- Of the 7 wrong answers, 6 are fakes built from real learner mistakes (no stem change: *penso*; a stem change
+  where there shouldn't be one: *piensamos*; wrong ending family: *comas*; spelling slips: *comu*) and 1 is a real
+  form for a different person, so you have to pick the right person too.
+- A verb counts as learned when you get it right first time. Keys on desktop: <kbd>1</kbd>–<kbd>8</kbd> pick a tile, <kbd>S</kbd> skip.
+
+Verbs live in `verbs.js`, grouped by type. Add `{ v: "hablar", en: "to speak" }` for a regular verb, or add
+`f: "pienso piensas piensa pensamos pensáis piensan"` (yo → ellos) for an irregular one.
 
 ## Install as an app (PWA)
 
