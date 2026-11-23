@@ -61,7 +61,7 @@
   .progress { height: 4px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 10px 0 14px; }
   .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .3s ease; }
 
-  .modes { display: grid; grid-template-columns: 1fr 1fr; background: var(--chip); border-radius: 999px; padding: 3px; margin-bottom: 8px; }
+  .modes { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--chip); border-radius: 999px; padding: 3px; margin-bottom: 8px; }
   .modes button { border: 0; background: none; border-radius: 999px; padding: 7px 10px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; }
   .modes button.on { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
 
@@ -73,6 +73,38 @@
   .s-hint { font-size: 15px; font-style: italic; color: var(--accent); }
   .s-en { font-size: 16px; color: var(--muted); }
   .s-note { font-size: 14px; color: var(--muted); background: var(--chip); border-radius: 12px; padding: 8px 12px; max-width: 34ch; }
+
+  /* verb drag practice */
+  .vb { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .vgrid { position: relative; flex: 1; min-height: 0; max-height: 560px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+    gap: 10px; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .vt { display: grid; place-items: center; text-align: center; padding: 6px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--panel);
+    box-shadow: var(--shadow); font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: clamp(17px, 5vw, 24px); line-height: 1.1;
+    overflow-wrap: anywhere; cursor: pointer; transition: transform .15s, background .2s, opacity .2s, border-color .15s; }
+  .vt.hover { border-color: var(--accent); transform: scale(1.05); background: var(--accent-soft); }
+  .vt.wrong { background: var(--accent-soft); color: var(--accent); border-color: transparent; text-decoration: line-through; opacity: .5; cursor: default; animation: shake .4s; box-shadow: none; }
+  .vt.right { background: var(--good-soft); color: var(--good); border-color: var(--good); font-weight: 650; animation: pop .45s; }
+  @keyframes shake { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+  @keyframes pop { 40% { transform: scale(1.14); } }
+  .vc { display: grid; place-items: center; position: relative; }
+  .vchip { position: relative; z-index: 6; width: 100%; height: 100%; border-radius: 20px; background: var(--ink); color: var(--bg);
+    display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; padding: 6px; cursor: grab; touch-action: none;
+    box-shadow: 0 14px 30px -12px rgba(0,0,0,.5); transition: transform .25s cubic-bezier(.2,.7,.2,1), opacity .25s; }
+  .vchip.drag { transition: none; cursor: grabbing; box-shadow: 0 22px 40px -12px rgba(0,0,0,.55); }
+  .vchip.placed { opacity: 0; }
+  .vchip.nudge { animation: shake .4s; }
+  .vchip .inf { font-family: Fraunces, Georgia, serif; font-weight: 650; font-size: clamp(17px, 5vw, 24px); line-height: 1.05; overflow-wrap: anywhere; text-align: center; }
+  .vchip .per { font-size: 15px; font-style: italic; color: var(--sun); font-weight: 600; }
+  .vfoot { display: flex; align-items: center; gap: 10px; margin-top: 14px; min-height: 44px; }
+  .vfoot .v-en { flex: 1; font-size: 15px; color: var(--muted); }
+  .vfoot .v-msg { flex: 1; font-size: 15px; font-weight: 600; }
+  .vfb { position: absolute; left: 50%; top: 50%; z-index: 8; pointer-events: none; transform: translate(-50%, -50%);
+    font-family: Fraunces, Georgia, serif; font-weight: 650; font-size: clamp(30px, 10vw, 46px); color: var(--good); white-space: nowrap;
+    text-shadow: 0 2px 0 var(--panel), 0 0 18px var(--panel); animation: cheer 1.1s ease-out forwards; }
+  @keyframes cheer { 0% { transform: translate(-50%, -50%) scale(.4); opacity: 0; } 25% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    75% { opacity: 1; } 100% { transform: translate(-50%, -80%) scale(1); opacity: 0; } }
+  .spark { position: absolute; z-index: 7; pointer-events: none; font-size: 22px; animation: spark .9s ease-out forwards; }
+  @keyframes spark { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
 
   #stage { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .deck { flex: 1; min-height: 0; position: relative; perspective: 1600px; }
@@ -180,7 +212,7 @@
     #study { max-height: 900px; }
     h1 { font-size: 36px; }
   }
-  @media (prefers-reduced-motion: reduce) { .card, .card.fly { transition: none; } #settings { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .card, .card.fly, .vchip, .vt { transition: none; animation: none; } #settings { animation: none; } .spark { display: none; } }
 </style>
 </head>
 <body>
@@ -190,6 +222,7 @@
   <div class="modes" role="tablist" aria-label="Card type">
     <button role="tab" data-mode="words">Palabras</button>
     <button role="tab" data-mode="sentences">Frases</button>
+    <button role="tab" data-mode="verbs">Verbos</button>
   </div>
   <div class="bar">
     <button class="topics-btn" id="topicsBtn" aria-label="Choose topics and settings">
@@ -233,6 +266,92 @@
 
 <script src="cards.js"></script>
 <script src="sentences.js"></script>
+<script src="verbs.js"></script>
+<script>
+// ---------- Verb engine: present-tense forms + believable wrong answers ----------
+// (kept separate from the UI so it can be tested on its own)
+window.VERB_ENGINE = (function () {
+  const PERSONS = ["yo", "tú", "él / ella", "nosotros", "vosotros", "ellos"];
+  const SAY_AS = ["yo", "tú", "él", "nosotros", "vosotros", "ellos"];
+  const END = {
+    ar: ["o", "as", "a", "amos", "áis", "an"],
+    er: ["o", "es", "e", "emos", "éis", "en"],
+    ir: ["o", "es", "e", "imos", "ís", "en"]
+  };
+  const plain = s => s.normalize("NFD").replace(/[̀-́]/g, "").normalize("NFC");
+  const cls = v => plain(v).slice(-2);              // ar / er / ir  (oír, reír → ir)
+  const forms = c => c.f ? c.f.split(/\s+/) : END[cls(c.v)].map(e => c.v.slice(0, -2) + e);
+  const VOW = "aeiouáéíóú", isV = ch => VOW.includes(ch);
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  // Wrong answers that look like real learner mistakes.
+  function mistakes(c, F, p) {
+    const k = cls(c.v), infStem = c.v.slice(0, -2), right = F[p], out = [];
+    out.push(infStem + END[k][p]);                                        // forgot the stem change / irregular yo (penso, sabo, haco)
+    const yo = F[0], yoStem = yo.endsWith("o") ? yo.slice(0, -1) : null;
+    if (yoStem && yoStem !== infStem) out.push(yoStem + END[k][p]);       // changed where it shouldn't (piensamos, hagemos, conozces)
+    const e = END[k][p];
+    if (right.endsWith(e)) {
+      const stem = right.slice(0, -e.length);
+      ["ar", "er", "ir"].filter(x => x !== k).forEach(x => out.push(stem + END[x][p]));   // wrong ending family (comas, vivemos)
+    }
+    if (right.includes("ie")) out.push(right.replace("ie", "ei"));
+    if (right.includes("ue")) out.push(right.replace("ue", "eu"), right.replace("ue", "o"));
+    if (right.includes("zc")) out.push(right.replace("zc", "z"), right.replace("zc", "sc"));
+    if (/jo$/.test(right) && p === 0) out.push(right.replace(/jo$/, "go"));   // elijo → eligo
+    if (/gu/.test(c.v) && p === 0 && !right.includes("gu")) out.push(right.replace(/go$/, "guo"));   // sigo → siguo
+    return out;
+  }
+  // Spelling slips: change one vowel that isn't part of a vowel pair (como → comu, cemo).
+  // (any = also change vowels inside a pair, used when the word has few lone vowels)
+  function slips(w, any) {
+    const out = [], vs = [];
+    for (let i = 0; i < w.length; i++) if (isV(w[i]) && (any || (!isV(w[i - 1] || "") && !isV(w[i + 1] || "")))) vs.push(i);
+    vs.reverse().slice(0, any ? 4 : 2).forEach(i => "aeiou".split("").forEach(n => { if (plain(w[i]) !== n) out.push(w.slice(0, i) + n + w.slice(i + 1)); }));
+    return out;
+  }
+  function extras(w) {
+    const out = [];
+    if (plain(w) !== w) out.push(plain(w));                               // missing accent
+    if (w.includes("v")) out.push(w.replace("v", "b"));
+    if (w.includes("b")) out.push(w.replace("b", "v"));
+    if (w.endsWith("y")) out.push(w.slice(0, -1) + "i");
+    if (w.includes("z")) out.push(w.replace("z", "s"));
+    if (w.includes("c")) out.push(w.replace("c", "s"));
+    if (w.includes("ll")) out.push(w.replace("ll", "y"));
+    if (w.includes("j")) out.push(w.replace("j", "g"));
+    if (!w.endsWith("s")) out.push(w + "s");
+    if (/[aeo]$/.test(w)) out.push(w + "n");
+    if (plain(w) === w) { const i = [...w].map(isV).lastIndexOf(true); if (i >= 0) out.push(w.slice(0, i) + "áéíóú"["aeiou".indexOf(w[i])] + w.slice(i + 1)); }   // accent where there isn't one
+    if (w.length <= 3) out.push(w.replace(/([aeiou])$/, "$1y"), w.replace(/s$/, "is"), /^[aeiou]/.test(w) ? "h" + w : w.replace(/^([^aeiou])/, "$1$1"));   // tiny words (da, es, va)
+    return out;
+  }
+
+  // One question: the verb, a person, the right answer, and 8 tiles (1 right, 1 other real form, 6+ fakes).
+  function question(c, p) {
+    const F = forms(c);
+    if (p == null) p = Math.floor(Math.random() * 6);
+    const right = F[p], real = new Set(F.concat(c.v));
+    const used = new Set([right]), fakes = [];
+    const take = (list, max) => { for (const w of shuffle(list.slice())) {
+      if (fakes.length >= max) break;
+      if (w && w.length > 1 && !real.has(w) && !used.has(w)) { used.add(w); fakes.push(w); }
+    } };
+    take(mistakes(c, F, p), 4);
+    take(slips(right), 6);
+    take(extras(right), 6);
+    take(slips(right, true), 6);             // last resorts
+    take(slips(right).flatMap(w => slips(w, true)), 6);
+    // plus one real form for a different person: tests that you picked the right person
+    const others = F.filter(w => w !== right);
+    const tiles = fakes.slice(0, 6);
+    if (others.length) tiles.push(others[Math.floor(Math.random() * others.length)]);
+    tiles.push(right);
+    return { c, p, right, person: PERSONS[p], spoken: `${SAY_AS[p]} ${right}`, tiles: shuffle(tiles.filter(Boolean)) };
+  }
+  return { forms, question, PERSONS };
+})();
+</script>
 <script>
 (function () {
   // Big topics are split into evenly sized groups of 7-9 words (e.g. 25 words -> 9 + 8 + 8).
@@ -267,12 +386,17 @@
   }
   const SENTENCES = window.SENTENCES || [];
   SENTENCES.forEach(t => t.cards.forEach(c => { c.full = c.es.replace("___", c.a); c.id = "s:" + c.full; }));
+  const VERBS = window.VERBS || [];
+  VERBS.forEach(t => t.cards.forEach(c => { c.id = "v:" + c.v; }));
+  const VE = window.VERB_ENGINE;
   const MODES = {
     words: setup(window.TOPICS || [], saved.selected, saved.known),
-    sentences: setup(SENTENCES, saved.sSelected, saved.sKnown)
+    sentences: setup(SENTENCES, saved.sSelected, saved.sKnown),
+    verbs: setup(VERBS, saved.vSelected, saved.vKnown)
   };
+  const MODE_ORDER = ["words", "sentences", "verbs"];
   const S = {
-    mode: saved.mode === "sentences" ? "sentences" : "words",
+    mode: MODE_ORDER.includes(saved.mode) ? saved.mode : "words",
     dueOnly: !!saved.dueOnly, autoSay: saved.autoSay !== false, showEn: saved.showEn !== false,
     theme: saved.theme || null,
     deck: [], i: 0, flipped: false, seen: 0, got: 0, again: 0
@@ -284,11 +408,12 @@
   let TOPICS, T, ALL;
   const useMode = m => { S.mode = m; ({ TOPICS, T, ALL } = MODES[m]); };
   useMode(S.mode);
-  const unit = () => S.mode === "sentences" ? "sentence" : "word";
+  const unit = () => ({ words: "word", sentences: "sentence", verbs: "verb" })[S.mode];
   const spoken = c => c.full || c.es;
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({
     selected: [...MODES.words.selected], known: [...MODES.words.known],
-    sSelected: [...MODES.sentences.selected], sKnown: [...MODES.sentences.known], mode: S.mode, dueOnly: S.dueOnly, autoSay: S.autoSay, showEn: S.showEn, theme: S.theme
+    sSelected: [...MODES.sentences.selected], sKnown: [...MODES.sentences.known],
+    vSelected: [...MODES.verbs.selected], vKnown: [...MODES.verbs.known], mode: S.mode, dueOnly: S.dueOnly, autoSay: S.autoSay, showEn: S.showEn, theme: S.theme
   })); } catch (e) {} };
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
@@ -326,7 +451,7 @@
     const p = pool();
     const fresh = shuffle(p.filter(c => !S.known.has(c.id)));
     const learned = S.dueOnly ? [] : shuffle(p.filter(c => S.known.has(c.id)));
-    Object.assign(S, { deck: fresh.concat(learned), i: 0, flipped: false, seen: 0, got: 0, again: 0 });
+    Object.assign(S, { deck: fresh.concat(learned), i: 0, flipped: false, seen: 0, got: 0, again: 0, q: null });
     renderTopBar(); renderStudy();
   }
   function renderTopBar() {
@@ -353,13 +478,14 @@
       stage.innerHTML = `<div class="done">
           <img src="${img(none ? "books" : allKnown ? "trophy" : "party-popper")}" alt="">
           <h2>${none ? "No topics" : allKnown ? "¡Todo aprendido!" : "¡Muy bien!"}</h2>
-          <p>${none ? "Choose at least one topic to study." : allKnown ? "You've learned every ${unit()} in these topics." : `${S.got} got it · ${S.again} needed another look`}</p>
+          <p>${none ? "Choose at least one topic to study." : allKnown ? "You've learned every ${unit()} in these topics." : S.mode === "verbs" ? `${S.got} right first time · ${S.again} took a few tries` : `${S.got} got it · ${S.again} needed another look`}</p>
           ${none ? "" : `<button class="big" id="goAgain">${allKnown ? "Review them all" : "Go again"}</button>`}
           <button class="pill" id="goTopics">Change topics</button></div>`;
       if ($("goAgain")) $("goAgain").onclick = () => { if (allKnown && S.dueOnly) { S.dueOnly = false; persist(); } build(); };
       $("goTopics").onclick = openSettings;
       return;
     }
+    if (S.mode === "verbs") return renderVerb();
     const c = S.deck[S.i];
     const tag = `<div class="tag">${esc(c.topic.es)}${S.known.has(c.id) ? ' · <span class="known">✓ learned</span>' : ""}</div>`;
     const stamps = `<span class="stamp got">Got it</span><span class="stamp again">Again</span>`;
@@ -405,6 +531,110 @@
     attachSwipe($("card"));
     const nx = S.deck[S.i + 1]; if (nx && nx.img) new Image().src = img(nx.img);   // preload the next picture
   }
+  /* ---------- verb drag practice ---------- */
+  const CHEERS = ["¡Muy bien!", "¡Genial!", "¡Perfecto!", "¡Eso es!", "¡Olé!", "¡Fenomenal!", "¡Bravo!"];
+  const SPARKS = ["✨", "🎉", "⭐", "💥", "🌟"];
+  const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+  function renderVerb() {
+    const c = S.deck[S.i];
+    if (!S.q || S.q.at !== S.i) S.q = { ...VE.question(c), at: S.i, tries: 0, done: false };
+    const q = S.q;
+    // 3 x 3 grid: the verb in the middle, 8 answers around it
+    const cells = q.tiles.map((w, n) => `<button class="vt" data-w="${esc(w)}" lang="es" aria-label="${esc(w)}">${esc(w)}</button>`);
+    cells.splice(4, 0, `<div class="vc"><div class="vchip" id="vchip" role="button" aria-label="${esc(c.v)}, ${esc(q.person)}">
+        <span class="inf" lang="es">${esc(c.v)}</span><span class="per" lang="es">${esc(q.person)}</span></div></div>`);
+    $("stage").innerHTML = `<div class="vb">
+        <div class="tag">${esc(c.topic.es)}${S.known.has(c.id) ? ' · <span class="known">✓ learned</span>' : ""}</div>
+        <div style="height:10px"></div>
+        <div class="vgrid" id="vgrid">${cells.join("")}</div>
+        <div class="vfoot"><span class="v-en" id="vmsg">${S.showEn ? esc(c.en) + " · " : ""}Drag the verb to the right form</span>
+          <button class="pill" id="vskip">Skip</button></div>
+      </div>`;
+    $("vskip").onclick = () => nextVerb(false, true);
+    document.querySelectorAll(".vt").forEach(t => t.onclick = () => answer(t));
+    attachVerbDrag($("vchip"));
+  }
+  function answer(t) {
+    const q = S.q; if (!q || q.done || t.classList.contains("wrong")) return;
+    const chip = $("vchip");
+    if (t.dataset.w === q.right) {
+      q.done = true;
+      t.classList.add("right");
+      if (chip) {   // slide the verb into the right tile, then fade it out
+        const a = chip.getBoundingClientRect(), b = t.getBoundingClientRect();
+        chip.classList.remove("drag");
+        chip.style.transform = `translate(${b.left + b.width / 2 - a.left - a.width / 2 + (chip._dx || 0)}px, ${b.top + b.height / 2 - a.top - a.height / 2 + (chip._dy || 0)}px) scale(.6)`;
+        chip.classList.add("placed");
+      }
+      cheer(t);
+      buzz(35);
+      if (S.autoSay) say(q.spoken);
+      $("vmsg").innerHTML = `<span class="v-msg" style="color:var(--good)" lang="es">${esc(q.spoken)}</span>`;
+      setTimeout(() => nextVerb(q.tries === 0), 1300);
+    } else {
+      q.tries++;
+      t.classList.add("wrong");
+      buzz([40, 50, 40]);
+      snapBack(chip);
+      $("vmsg").innerHTML = `<span class="v-msg" style="color:var(--accent)" lang="es">${q.tries === 1 ? "Casi… ¡otra vez!" : "¡Sigue intentando!"}</span>`;
+    }
+  }
+  function cheer(t) {
+    const grid = $("vgrid"); if (!grid) return;
+    const fb = document.createElement("div");
+    fb.className = "vfb"; fb.textContent = CHEERS[Math.floor(Math.random() * CHEERS.length)];
+    grid.appendChild(fb);
+    const g = grid.getBoundingClientRect(), r = t.getBoundingClientRect();
+    for (let n = 0; n < 14; n++) {
+      const s = document.createElement("span"), ang = (n / 14) * Math.PI * 2, d = 60 + Math.random() * 70;
+      s.className = "spark"; s.textContent = SPARKS[n % SPARKS.length];
+      s.style.left = (r.left - g.left + r.width / 2 - 11) + "px"; s.style.top = (r.top - g.top + r.height / 2 - 14) + "px";
+      s.style.setProperty("--dx", Math.cos(ang) * d + "px"); s.style.setProperty("--dy", Math.sin(ang) * d + "px");
+      s.style.setProperty("--r", (Math.random() * 360 - 180) + "deg");
+      grid.appendChild(s);
+    }
+  }
+  function nextVerb(firstTry, skipped) {
+    const c = S.deck[S.i]; if (!c) return;
+    if (!skipped) {
+      if (firstTry) { S.known.add(c.id); S.got++; } else { S.known.delete(c.id); S.again++; }
+      persist();
+    }
+    S.i++; S.seen++; S.q = null; renderStudy();
+  }
+  function snapBack(chip) {
+    if (!chip) return;
+    chip.classList.remove("drag"); chip.style.transform = ""; chip._dx = chip._dy = 0;
+  }
+  function attachVerbDrag(chip) {
+    let x0 = 0, y0 = 0, active = false, moved = false, over = null;
+    const tiles = () => [...document.querySelectorAll(".vt:not(.wrong)")];
+    const hit = (x, y) => tiles().find(t => { const r = t.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; });
+    chip.addEventListener("pointerdown", e => {
+      if (S.q.done || (e.pointerType === "mouse" && e.button !== 0)) return;
+      active = true; moved = false; x0 = e.clientX; y0 = e.clientY;
+      chip.setPointerCapture(e.pointerId); chip.classList.add("drag");
+    });
+    chip.addEventListener("pointermove", e => {
+      if (!active) return;
+      const dx = e.clientX - x0, dy = e.clientY - y0;
+      if (Math.abs(dx) + Math.abs(dy) > 6) moved = true;
+      chip._dx = dx; chip._dy = dy;
+      chip.style.transform = `translate(${dx}px, ${dy}px) scale(.82)`;
+      const t = hit(e.clientX, e.clientY);
+      if (t !== over) { if (over) over.classList.remove("hover"); over = t; if (t) t.classList.add("hover"); }
+    });
+    const end = e => {
+      if (!active) return; active = false;
+      if (over) over.classList.remove("hover");
+      const t = moved ? hit(e.clientX, e.clientY) : null; over = null;
+      if (t) answer(t);
+      else { snapBack(chip); if (!moved) { chip.classList.remove("nudge"); void chip.offsetWidth; chip.classList.add("nudge"); } }
+    };
+    chip.addEventListener("pointerup", end);
+    chip.addEventListener("pointercancel", () => { active = false; if (over) over.classList.remove("hover"); over = null; snapBack(chip); });
+  }
+
   function flip() {
     S.flipped = !S.flipped; $("card").classList.toggle("flipped", S.flipped);
     if (S.flipped && S.autoSay) say(spoken(S.deck[S.i]));
@@ -498,7 +728,7 @@
     if (!canSay) document.querySelector('[data-opt="autoSay"]').hidden = true;
     const p = pool(), n = S.dueOnly ? p.filter(c => !S.known.has(c.id)).length : p.length;
     $("doneCount").textContent = S.selected.size ? plural(n, unit()) : "pick a topic";
-    $("sheetTitle").textContent = S.mode === "sentences" ? "Frases" : "Topics";
+    $("sheetTitle").textContent = ({ words: "Topics", sentences: "Frases", verbs: "Verbos" })[S.mode];
     $("doneBtn").disabled = S.selected.size === 0;
   }
   document.querySelectorAll(".opt").forEach(o => o.onclick = () => { S[o.dataset.opt] = !S[o.dataset.opt]; persist(); renderSettings(); });
@@ -526,16 +756,24 @@
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (!$("settings").hidden) { if (e.key === "Escape") $("doneBtn").click(); return; }
     const k = e.key.toLowerCase();
+    if (S.mode === "verbs") {
+      if (k === "s") nextVerb(false, true);
+      else if (k === "p" && S.q) say(S.q.spoken);
+      else if (k === "m") switchMode(MODE_ORDER[(MODE_ORDER.indexOf(S.mode) + 1) % 3]);
+      else if (k === "t") openSettings();
+      else if (/^[1-8]$/.test(k)) { const t = document.querySelectorAll(".vt")[+k - 1]; if (t) t.click(); }
+      return;
+    }
     if (k === " ") { e.preventDefault(); if ($("card")) flip(); }
     else if (k === "arrowright" || k === "g") advance("got");
     else if (k === "arrowleft" || k === "a") advance("again");
     else if (k === "s") advance("skip");
     else if (k === "p" && S.deck[S.i]) say(spoken(S.deck[S.i]));
-    else if (k === "m") switchMode(S.mode === "words" ? "sentences" : "words");
+    else if (k === "m") switchMode(MODE_ORDER[(MODE_ORDER.indexOf(S.mode) + 1) % 3]);
     else if (k === "t") openSettings();
   });
 
-  /* ---------- Palabras / Frases switch ---------- */
+  /* ---------- Palabras / Frases / Verbos switch ---------- */
   const renderModes = () => document.querySelectorAll(".modes button").forEach(b => {
     const on = b.dataset.mode === S.mode; b.classList.toggle("on", on); b.setAttribute("aria-selected", on);
   });
