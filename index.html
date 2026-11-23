@@ -95,6 +95,30 @@
   .vchip.nudge { animation: shake .4s; }
   .vchip .inf { font-family: Fraunces, Georgia, serif; font-weight: 650; font-size: clamp(17px, 5vw, 24px); line-height: 1.05; overflow-wrap: anywhere; text-align: center; }
   .vchip .per { font-size: 15px; font-style: italic; color: var(--sun); font-weight: 600; }
+  .vtop { display: flex; justify-content: center; margin-bottom: 10px; }
+  .vrule { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--panel); border-radius: 999px;
+    padding: 6px 12px 6px 14px; font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+  .vrule .q { width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; text-transform: none; }
+  .vrule .known { color: var(--good); }
+  .vrule:active { transform: scale(.97); }
+  #vpop { position: fixed; inset: 0; z-index: 30; display: flex; align-items: flex-end; justify-content: center; background: rgba(20,14,8,.45); animation: fade .2s; }
+  @keyframes fade { from { opacity: 0; } }
+  .vpop { width: 100%; max-width: 560px; max-height: 92dvh; overflow-y: auto; background: var(--bg); border-radius: 26px 26px 0 0;
+    padding: 18px 20px calc(22px + var(--safe-b)); box-shadow: 0 -20px 50px -20px rgba(0,0,0,.4); animation: up .28s cubic-bezier(.2,.7,.2,1); }
+  .vpop-top { display: flex; align-items: flex-start; gap: 12px; }
+  .vpop h2 { font-family: Fraunces, Georgia, serif; font-weight: 650; font-size: 32px; line-height: 1.05; margin: 0; }
+  .vpop h2 small { display: block; font: 400 15px "Bricolage Grotesque", sans-serif; color: var(--muted); margin-top: 4px; }
+  .vpop h3 { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 18px 0 6px; }
+  .vpop ul { margin: 0; padding-left: 20px; } .vpop li { margin: 3px 0; }
+  .vpop .ex { font-family: Fraunces, Georgia, serif; font-style: italic; margin-top: 8px; }
+  .vpop .quirk { background: var(--chip); border-radius: 12px; padding: 10px 12px; font-size: 15px; margin-top: 10px; }
+  .vtable { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .vtable div { border: 1.5px solid var(--line); background: var(--panel); border-radius: 12px; padding: 7px 10px; }
+  .vtable div small { display: block; font-size: 12px; color: var(--muted); }
+  .vtable div b { font-family: Fraunces, Georgia, serif; font-size: 21px; font-weight: 500; }
+  .vtable div.ch { background: var(--accent-soft); border-color: var(--accent); }
+  .vtable div.ch b { color: var(--accent); font-weight: 650; }
+  .vpop .legend { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
   .vfoot { display: flex; align-items: center; gap: 10px; margin-top: 14px; min-height: 44px; }
   .vfoot .v-en { flex: 1; font-size: 15px; color: var(--muted); }
   .vfoot .v-msg { flex: 1; font-size: 15px; font-weight: 600; }
@@ -264,6 +288,9 @@
   <div class="dock"><button class="big" id="doneBtn"><b>Back to cards</b><span id="doneCount"></span></button></div>
 </section>
 
+<!-- Verb rule pop-up (Verbos tab) -->
+<div id="vpop" hidden></div>
+
 <script src="cards.js"></script>
 <script src="sentences.js"></script>
 <script src="verbs.js"></script>
@@ -349,7 +376,46 @@ window.VERB_ENGINE = (function () {
     tiles.push(right);
     return { c, p, right, person: PERSONS[p], spoken: `${SAY_AS[p]} ${right}`, tiles: shuffle(tiles.filter(Boolean)) };
   }
-  return { forms, question, PERSONS };
+  // ---- rule explanations (from the Taronja notes) ----
+  const boot = (from, to, ex) => ({
+    short: `Bota · ${from} → ${to}`, title: `Boot verb: ${from} → ${to}`,
+    lines: [`The ${from} in the stem changes to ${to} in yo, tú, él and ellos.`,
+      `Nosotros and vosotros keep the ${from}.`,
+      "Draw a line round the forms that change: it's the shape of a boot.",
+      "The endings stay regular."], ex });
+  const RULES = {
+    ar: { short: "Regular -ar", title: "Regular -ar verb", lines: ["Take off -ar and add: -o, -as, -a, -amos, -áis, -an.", "Nothing changes in the stem."], ex: "hablar → hablo, hablas, habla…" },
+    er: { short: "Regular -er", title: "Regular -er verb", lines: ["Take off -er and add: -o, -es, -e, -emos, -éis, -en.", "Él / ella ends in -e (not -a). Ellos ends in -en (not -an)."], ex: "comer → como, comes, come…" },
+    ir: { short: "Regular -ir", title: "Regular -ir verb", lines: ["Take off -ir and add: -o, -es, -e, -imos, -ís, -en.", "Same as -er, except nosotros (-imos) and vosotros (-ís)."], ex: "vivir → vivo, vives, vive…" },
+    ie: boot("e", "ie", "pensar → pienso … pensamos"),
+    ue: boot("o", "ue", "poder → puedo … podemos"),
+    "u-ue": boot("u", "ue", "jugar → juego … jugamos"),
+    i: Object.assign(boot("e", "i", "pedir → pido … pedimos"), { extra: "Only -ir verbs do this." }),
+    sombrero: { short: "Sombrero · yo especial", title: "Hat verb (sombrero): special yo", lines: ["Only the yo form is irregular, as if it's wearing a hat.", "Every other form is regular."] },
+    "sb-ie": { short: "Sombrero + bota", title: "Hat + boot verb: yo -go, then e → ie", lines: ["Yo is irregular: it ends in -go (the hat).", "Tú, él and ellos change e → ie (the boot).", "Nosotros and vosotros are regular."], ex: "tener → tengo, tienes … tenemos" },
+    "sb-i": { short: "Sombrero + bota", title: "Hat + boot verb: yo -go, then e → i", lines: ["Yo is irregular: it ends in -go (the hat).", "Tú, él and ellos change e → i (the boot).", "Nosotros and vosotros are regular."], ex: "decir → digo, dices … decimos" },
+    irregular: { short: "Completamente irregular", title: "Completely irregular", lines: ["There's no pattern to follow.", "Learn all six forms by heart."] }
+  };
+  const HAT = {
+    go: "The -go group: hacer → hago, poner → pongo, traer → traigo, salir → salgo, oír → oigo.",
+    zco: "The -zco group: conocer → conozco, conducir → conduzco, traducir → traduzco, ofrecer → ofrezco…",
+    oy: "The -oy group: estar → estoy, dar → doy.",
+    other: "Special yo: saber → sé, ver → veo, coger → cojo."
+  };
+  const TOPIC_RULE = { "v-ie": "ie", "v-ue": "ue", "v-i": "i", "v-yo": "sombrero" };
+  function info(c, topicId) {
+    const F = forms(c), k = cls(c.v);
+    const reg = END[k].map(e => c.v.slice(0, -2) + e);
+    const r = c.r || TOPIC_RULE[topicId] || k;
+    const rule = { ...RULES[r] };
+    if (r === "sombrero") {
+      const yo = F[0];
+      rule.extra = HAT[yo.endsWith("go") ? "go" : yo.endsWith("zco") ? "zco" : yo.endsWith("oy") ? "oy" : "other"];
+      rule.ex = `${c.v} → ${yo}, ${F[1]}, ${F[2]}…`;
+    }
+    return { rule, forms: F, changed: F.map((f, i) => f !== reg[i]), persons: PERSONS };
+  }
+  return { forms, question, info, PERSONS };
 })();
 </script>
 <script>
@@ -544,13 +610,14 @@ window.VERB_ENGINE = (function () {
     cells.splice(4, 0, `<div class="vc"><div class="vchip" id="vchip" role="button" aria-label="${esc(c.v)}, ${esc(q.person)}">
         <span class="inf" lang="es">${esc(c.v)}</span><span class="per" lang="es">${esc(q.person)}</span></div></div>`);
     $("stage").innerHTML = `<div class="vb">
-        <div class="tag">${esc(c.topic.es)}${S.known.has(c.id) ? ' · <span class="known">✓ learned</span>' : ""}</div>
-        <div style="height:10px"></div>
+        <div class="vtop"><button class="vrule" id="vrule" aria-label="Explain the rule for ${esc(c.v)}">
+          <span>${esc(VE.info(c, (c.topic.parent || c.topic).id).rule.short)}${S.known.has(c.id) ? ' · <span class="known">✓</span>' : ""}</span><span class="q">?</span></button></div>
         <div class="vgrid" id="vgrid">${cells.join("")}</div>
         <div class="vfoot"><span class="v-en" id="vmsg">${S.showEn ? esc(c.en) + " · " : ""}Drag the verb to the right form</span>
           <button class="pill" id="vskip">Skip</button></div>
       </div>`;
     $("vskip").onclick = () => nextVerb(false, true);
+    $("vrule").onclick = openRule;
     document.querySelectorAll(".vt").forEach(t => t.onclick = () => answer(t));
     attachVerbDrag($("vchip"));
   }
@@ -570,7 +637,7 @@ window.VERB_ENGINE = (function () {
       buzz(35);
       if (S.autoSay) say(q.spoken);
       $("vmsg").innerHTML = `<span class="v-msg" style="color:var(--good)" lang="es">${esc(q.spoken)}</span>`;
-      setTimeout(() => nextVerb(q.tries === 0), 1300);
+      setTimeout(() => nextVerb(q.tries === 0 && !q.peeked), 1300);
     } else {
       q.tries++;
       t.classList.add("wrong");
@@ -594,6 +661,32 @@ window.VERB_ENGINE = (function () {
       grid.appendChild(s);
     }
   }
+  function openRule() {
+    const q = S.q; if (!q) return;
+    const c = q.c, I = VE.info(c, (c.topic.parent || c.topic).id), R = I.rule;
+    if (!q.done) q.peeked = true;   // peeking at the answers means it won't count as learned this time
+    // laid out like the class sheets: yo | nosotros, tú | vosotros, él | ellos
+    const cell = i => `<div class="${I.changed[i] ? "ch" : ""}"><small>${esc(I.persons[i])}</small><b lang="es">${esc(I.forms[i])}</b></div>`;
+    const any = I.changed.some(Boolean);
+    $("vpop").innerHTML = `<div class="vpop" role="dialog" aria-modal="true" aria-label="${esc(R.title)}">
+        <div class="vpop-top"><h2 lang="es">${esc(c.v)}<small lang="en">${esc(c.en)}</small></h2>
+          <button class="icon-btn" id="vpopX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <h3>${esc(R.title)}</h3>
+        <ul>${R.lines.map(l => `<li>${esc(l)}</li>`).join("")}${R.extra ? `<li>${esc(R.extra)}</li>` : ""}</ul>
+        ${R.ex ? `<div class="ex" lang="es">${esc(R.ex)}</div>` : ""}
+        ${c.q ? `<div class="quirk">⚠️ ${esc(c.q)}</div>` : ""}
+        <h3>${esc(c.v)}, presente</h3>
+        <div class="vtable">${[0, 3, 1, 4, 2, 5].map(cell).join("")}</div>
+        ${any ? `<p class="legend">Highlighted: the forms that break the regular pattern.</p>` : ""}
+        ${q.done ? "" : `<p class="legend">Peeking is fine, but this verb won't count as learned this round.</p>`}
+      </div>`;
+    $("vpop").hidden = false;
+    history.pushState({ v: "rule" }, "", "#rule");
+    $("vpopX").onclick = closeRule;
+    $("vpop").onclick = e => { if (e.target.id === "vpop") closeRule(); };
+  }
+  function closeRule() { if ($("vpop").hidden) return; history.state && history.state.v === "rule" ? history.back() : ($("vpop").hidden = true); }
+
   function nextVerb(firstTry, skipped) {
     const c = S.deck[S.i]; if (!c) return;
     if (!skipped) {
@@ -749,16 +842,21 @@ window.VERB_ENGINE = (function () {
   }
   $("topicsBtn").onclick = openSettings;
   $("doneBtn").onclick = () => { history.state && history.state.v === "settings" ? history.back() : closedSettings(); };
-  addEventListener("popstate", () => { if (!$("settings").hidden) closedSettings(); });
+  addEventListener("popstate", () => {
+    if (!$("vpop").hidden) { $("vpop").hidden = true; return; }
+    if (!$("settings").hidden) closedSettings();
+  });
   if (location.hash) history.replaceState(null, "", location.pathname);
 
   addEventListener("keydown", e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!$("vpop").hidden) { if (e.key === "Escape") closeRule(); return; }
     if (!$("settings").hidden) { if (e.key === "Escape") $("doneBtn").click(); return; }
     const k = e.key.toLowerCase();
     if (S.mode === "verbs") {
       if (k === "s") nextVerb(false, true);
       else if (k === "p" && S.q) say(S.q.spoken);
+      else if (k === "r" || k === "?") openRule();
       else if (k === "m") switchMode(MODE_ORDER[(MODE_ORDER.indexOf(S.mode) + 1) % 3]);
       else if (k === "t") openSettings();
       else if (/^[1-8]$/.test(k)) { const t = document.querySelectorAll(".vt")[+k - 1]; if (t) t.click(); }
