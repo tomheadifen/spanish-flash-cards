@@ -341,13 +341,13 @@
   <div class="dock"><button class="big" id="doneBtn"><b>Back to cards</b><span id="doneCount"></span></button></div>
 </section>
 
-<!-- "Right!" pop-up (Números tab): stays until you tap Siguiente -->
+<!-- "Right!" / answer pop-up (Números tab): stays until you tap Next -->
 <div id="nwin" hidden></div>
 
 <!-- Settings pop-up (gear button, every tab) -->
 <div id="prefs" hidden>
   <div class="vpop" role="dialog" aria-modal="true" aria-label="Settings">
-    <div class="vpop-top"><h2>Ajustes<small>Settings</small></h2>
+    <div class="vpop-top"><h2>Settings</h2>
       <button class="icon-btn" id="prefsX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="group" style="margin-top:16px">
       <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Reads each word aloud. Turn off to mute.</small></div><div class="switch"></div></div>
@@ -719,7 +719,7 @@ window.VERB_ENGINE = (function () {
       t.classList.add("wrong");
       buzz([40, 50, 40]);
       snapBack(chip);
-      $("vmsg").innerHTML = `<span class="v-msg" style="color:var(--accent)" lang="es">${q.tries === 1 ? "Casi… ¡otra vez!" : "¡Sigue intentando!"}</span>`;
+      $("vmsg").innerHTML = `<span class="v-msg" style="color:var(--accent)">${q.tries === 1 ? "Not quite. Try again!" : "Keep trying!"}</span>`;
     }
   }
   function cheer(t, box) {
@@ -756,7 +756,7 @@ window.VERB_ENGINE = (function () {
           <div class="nans" id="nans" lang="es"></div>
           <div class="nbank" id="nbank" lang="es">${q.tiles.map((w, i) => `<button class="ntile" data-i="${i}">${esc(w)}</button>`).join("")}</div>
           <div class="nfoot"><span class="v-msg" id="nmsg"></span>
-            <button class="pill" id="nclear">Borrar</button><button class="pill" id="nskip">Skip</button></div>
+            <button class="pill" id="nclear">Clear</button><button class="pill" id="nskip">Skip</button></div>
         </div>`;
       document.querySelectorAll("#nbank .ntile").forEach(b => b.onclick = () => place(+b.dataset.i));
       $("nclear").onclick = () => { if (!q.done) { q.placed = []; drawAnswer(); } };
@@ -764,7 +764,7 @@ window.VERB_ENGINE = (function () {
     } else {
       $("stage").innerHTML = `<div class="nb" id="nbox">${tag}
           <button class="nlisten" id="nplay" tabindex="-1" aria-label="Play the number again"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
-          <div class="nhow">Escucha y escribe el número. Tap to hear it again.</div>
+          <div class="nhow">Type the number you hear. Tap the speaker to hear it again.</div>
           <input class="ninput" id="ninput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="0" aria-label="Type the number you hear">
           <div class="nwords" id="nwords" lang="es"></div>
           <div class="nfoot"><span class="v-msg" id="nmsg"></span>
@@ -812,7 +812,7 @@ window.VERB_ENGINE = (function () {
     const bad = got.map((w, pos) => w !== q.right[pos] ? pos : -1).filter(p => p >= 0);
     drawAnswer(bad);
     buzz([40, 50, 40]);
-    $("nmsg").innerHTML = `<span style="color:var(--accent)">Casi… tap the red ${bad.length === 1 ? "word" : "words"} to fix ${bad.length === 1 ? "it" : "them"}.</span>`;
+    $("nmsg").innerHTML = `<span style="color:var(--accent)">Not quite. Tap the red ${bad.length === 1 ? "word" : "words"} to fix ${bad.length === 1 ? "it" : "them"}.</span>`;
   }
   // listen mode
   function checkHeard() {
@@ -823,7 +823,7 @@ window.VERB_ENGINE = (function () {
     q.tries++;
     inp.classList.remove("bad"); void inp.offsetWidth; inp.classList.add("bad");
     buzz([40, 50, 40]);
-    $("nmsg").innerHTML = `<span style="color:var(--accent)">${q.tries === 1 ? "No… ¡escucha otra vez!" : "¡Sigue intentando!"}</span>`;
+    $("nmsg").innerHTML = `<span style="color:var(--accent)">${q.tries === 1 ? "Not quite. Listen again!" : "Keep trying!"}</span>`;
     say(q.spoken);
     inp.select();
   }
@@ -842,13 +842,13 @@ window.VERB_ENGINE = (function () {
     const first = !skipped && q.tries === 0 && !q.peeked;
     if (skipped) { q.done = true; if (S.sound) say(q.spoken); }
     $("nwin").innerHTML = `<div class="vpop nwin" role="dialog" aria-modal="true" aria-label="${skipped ? "The answer" : "Correct"}">
-        ${skipped ? `<div class="yay" style="color:var(--ink)">La respuesta</div>`
+        ${skipped ? `<div class="yay" style="color:var(--ink)">The answer</div>`
           : `<div class="yay">${esc(["¡Muy bien!", "¡Genial!", "¡Perfecto!", "¡Eso es!", "¡Olé!", "¡Bravo!"][Math.floor(Math.random() * 6)])}</div>`}
         <div class="tries">${skipped ? "Skipped, so have a good look" : first ? "First try ✓" : q.peeked ? "You peeked, so this one comes back" : `Got it after ${q.tries + 1} tries`}</div>
         <div class="big-n">${esc(q.c.en)}</div>
         <div class="w" lang="es">${esc(q.spoken)}</div>
-        ${canSay && S.sound ? `<button class="pill hear" id="nwinSay"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>Escuchar</button>` : ""}
-        <button class="next" id="nwinNext">Siguiente →</button>
+        ${canSay && S.sound ? `<button class="pill hear" id="nwinSay"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>Listen</button>` : ""}
+        <button class="next" id="nwinNext">Next →</button>
       </div>`;
     $("nwin").hidden = false;
     if ($("nwinSay")) $("nwinSay").onclick = () => say(q.spoken);
