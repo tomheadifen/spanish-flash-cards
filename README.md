@@ -1,7 +1,7 @@
 # Tarjetas · Spanish flashcards
 
 Picture flashcards for Spain Spanish vocabulary: 504 words in 29 topics, split into groups of 7–9.
-Plus a **Frases** section for sentence mining (short sentences with one gap to fill) and a **Verbos** section for drag-and-drop conjugation practice.
+Plus a **Frases** section for sentence mining (short sentences with one gap to fill) and a **Verbos** section for drag-and-drop conjugation practice, and a **Números** section for numbers up to a million.
 Live at **https://tomheadifen.github.io/spanish-flash-cards/**
 
 ## How it works
@@ -23,7 +23,7 @@ Keyboard on desktop: <kbd>Space</kbd> flip, <kbd>→</kbd>/<kbd>G</kbd> got it, 
 
 ## Frases (sentence mining)
 
-Switch between **Palabras**, **Frases** and **Verbos** at the top of the screen (or press <kbd>M</kbd>).
+Switch between **Palabras**, **Frases**, **Verbos** and **Números** at the top of the screen (or press <kbd>M</kbd>).
 
 - **Front:** a short Spanish sentence with one gap, a hint (e.g. *beber, yo*) and the English meaning.
 - **Tap to flip:** the full sentence with the answer highlighted, plus a short note. The speaker reads the whole sentence.
@@ -48,6 +48,19 @@ Drag the verb onto the right form (or tap it).
 Verbs live in `verbs.js`, grouped by type. Add `{ v: "hablar", en: "to speak" }` for a regular verb, or add
 `f: "pienso piensas piensa pensamos pensáis piensan"` (yo → ellos) for an irregular one. Optional `r` sets the rule when
 it differs from the topic (e.g. `r: "sb-ie"` for tener) and `q` adds a quirk to the pop-up.
+
+## Números (numbers up to a million)
+
+The fourth tab. Each question is one of two kinds, picked at random:
+
+- **Build it:** you see a number (e.g. **347.512**) and tap the words in order: *trescientos · cuarenta · y · siete · mil · quinientos · doce*.
+  The spare tiles are traps for common mistakes: *diez y nueve* (→ *diecinueve*), *cincocientos* (→ *quinientos*),
+  an extra *y* after the hundreds, *miles*, *cien* / *ciento*, *sesenta* / *setenta*. Wrong words turn red; tap them to fix.
+- **Listen:** the phone says the number and you type the digits. Wrong answers replay it. *Show* reveals the words (then it won't count as learned).
+  Needs sound on; with sound off every question is "build it".
+
+Topics: 0–29, 30–99, 100–999, 1.000–9.999, up to 999.999, years, and *un millón* (new). Numbers live in `numbers.js`;
+the Spanish words are generated, so adding a number is just adding it to a list.
 
 ## Install as an app (PWA)
 
