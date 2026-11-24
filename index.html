@@ -785,7 +785,7 @@ window.VERB_ENGINE = (function () {
       setTimeout(() => { if (S.q === q) say(q.spoken); }, 250);
       $("ninput").focus();
     }
-    $("nskip").onclick = () => nextVerb(false, true);
+    $("nskip").onclick = () => { if (!q.done) showWin(q, true); };
   }
   // build mode
   function place(i) {
@@ -837,11 +837,14 @@ window.VERB_ENGINE = (function () {
     $("nmsg").innerHTML = `<span style="color:var(--good)" lang="es">${esc(q.kind === "build" ? q.c.en : q.spoken)}</span>`;
     setTimeout(() => { if (S.q === q) showWin(q); }, 700);   // let the cheer play, then the pop-up
   }
-  function showWin(q) {
-    const first = q.tries === 0 && !q.peeked;
-    $("nwin").innerHTML = `<div class="vpop nwin" role="dialog" aria-modal="true" aria-label="Correct">
-        <div class="yay">${esc(["¡Muy bien!", "¡Genial!", "¡Perfecto!", "¡Eso es!", "¡Olé!", "¡Bravo!"][Math.floor(Math.random() * 6)])}</div>
-        <div class="tries">${first ? "First try ✓" : q.peeked ? "You peeked, so this one comes back" : `Got it after ${q.tries + 1} tries`}</div>
+  // The pop-up after a right answer, or after Skip (then it shows the answer).
+  function showWin(q, skipped) {
+    const first = !skipped && q.tries === 0 && !q.peeked;
+    if (skipped) { q.done = true; if (S.sound) say(q.spoken); }
+    $("nwin").innerHTML = `<div class="vpop nwin" role="dialog" aria-modal="true" aria-label="${skipped ? "The answer" : "Correct"}">
+        ${skipped ? `<div class="yay" style="color:var(--ink)">La respuesta</div>`
+          : `<div class="yay">${esc(["¡Muy bien!", "¡Genial!", "¡Perfecto!", "¡Eso es!", "¡Olé!", "¡Bravo!"][Math.floor(Math.random() * 6)])}</div>`}
+        <div class="tries">${skipped ? "Skipped, so have a good look" : first ? "First try ✓" : q.peeked ? "You peeked, so this one comes back" : `Got it after ${q.tries + 1} tries`}</div>
         <div class="big-n">${esc(q.c.en)}</div>
         <div class="w" lang="es">${esc(q.spoken)}</div>
         ${canSay && S.sound ? `<button class="pill hear" id="nwinSay"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>Escuchar</button>` : ""}
@@ -849,7 +852,7 @@ window.VERB_ENGINE = (function () {
       </div>`;
     $("nwin").hidden = false;
     if ($("nwinSay")) $("nwinSay").onclick = () => say(q.spoken);
-    $("nwinNext").onclick = () => { $("nwin").hidden = true; nextVerb(first); };
+    $("nwinNext").onclick = () => { $("nwin").hidden = true; skipped ? nextVerb(false, true) : nextVerb(first); };
     $("nwinNext").focus();
   }
 
@@ -1076,7 +1079,7 @@ window.VERB_ENGINE = (function () {
     if (e.target && e.target.tagName === "INPUT") return;   // typing a number
     const k = e.key.toLowerCase();
     if (S.mode === "numbers") {
-      if (k === "s") nextVerb(false, true);
+      if (k === "s") { if (S.q && !S.q.done) showWin(S.q, true); }
       else if (k === "p" && S.q) say(S.q.spoken);
       else if (k === "backspace" && S.q && S.q.kind === "build") { e.preventDefault(); unplace(S.q.placed.length - 1); }
       else if (k === "m") switchMode(nextMode());
