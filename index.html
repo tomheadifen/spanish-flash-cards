@@ -62,7 +62,7 @@
   .progress { height: 4px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 10px 0 14px; }
   .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .3s ease; }
 
-  .modes { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--chip); border-radius: 999px; padding: 3px; margin-bottom: 8px; }
+  .modes { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--chip); border-radius: 999px; padding: 3px; margin-bottom: 8px; }
   .modes button { border: 0; background: none; border-radius: 999px; padding: 7px 10px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; }
   .modes button.on { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
 
@@ -135,6 +135,36 @@
     75% { opacity: 1; } 100% { transform: translate(-50%, -80%) scale(1); opacity: 0; } }
   .spark { position: absolute; z-index: 7; pointer-events: none; font-size: 22px; animation: spark .9s ease-out forwards; }
   @keyframes spark { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
+
+  /* numbers practice */
+  .nb { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .nnum { font-family: Fraunces, Georgia, serif; font-weight: 650; font-size: clamp(42px, 13vw, 66px); text-align: center; line-height: 1; margin: 14px 0 16px; letter-spacing: .01em; }
+  .nhow { text-align: center; font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+  .nans { min-height: 66px; border: 2px dashed var(--line); border-radius: 18px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+    align-content: flex-start; background: var(--panel); transition: background .2s, border-color .2s; }
+  .nans .ph { margin: auto; color: var(--muted); font-size: 15px; }
+  .nans.right { border-style: solid; border-color: var(--good); background: var(--good-soft); }
+  .nans.right .ntile { color: var(--good); border-color: var(--good); }
+  .nbank { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+  .ntile { border: 1.5px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 12px; padding: 9px 13px;
+    font-family: Fraunces, Georgia, serif; font-size: 19px; line-height: 1.1; cursor: pointer; box-shadow: var(--shadow); }
+  .ntile:active { transform: scale(.96); }
+  .nans .ntile { box-shadow: none; background: var(--chip); }
+  .ntile.used { visibility: hidden; }
+  .ntile.bad { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); animation: shake .4s; }
+  .nlisten { width: 118px; height: 118px; border-radius: 50%; border: none; background: var(--accent); color: #fff; display: grid; place-items: center;
+    margin: 18px auto 8px; cursor: pointer; box-shadow: 0 14px 30px -12px rgba(0,0,0,.45); }
+  .nlisten svg { width: 52px; height: 52px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .nlisten:active { transform: scale(.95); }
+  .ninput { width: 100%; margin-top: 16px; padding: 12px; border: 2px solid var(--line); border-radius: 18px; background: var(--panel); color: var(--ink);
+    font-family: Fraunces, Georgia, serif; font-weight: 650; font-size: 40px; text-align: center; }
+  .ninput:focus { outline: none; border-color: var(--accent); }
+  .ninput.bad { border-color: var(--accent); background: var(--accent-soft); animation: shake .4s; }
+  .ninput.good { border-color: var(--good); background: var(--good-soft); color: var(--good); }
+  .nwords { text-align: center; font-family: Fraunces, Georgia, serif; font-style: italic; font-size: 20px; color: var(--muted); min-height: 30px; margin-top: 12px; }
+  .nfoot { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 16px; }
+  .nfoot .v-msg { flex: 1; font-size: 15px; font-weight: 600; }
+  .nfoot .go { border: none; border-radius: 999px; padding: 11px 20px; background: var(--ink); color: var(--bg); font-weight: 600; font-size: 15px; cursor: pointer; }
 
   #stage { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .deck { flex: 1; min-height: 0; position: relative; perspective: 1600px; }
@@ -253,6 +283,7 @@
     <button role="tab" data-mode="words">Palabras</button>
     <button role="tab" data-mode="sentences">Frases</button>
     <button role="tab" data-mode="verbs">Verbos</button>
+    <button role="tab" data-mode="numbers">Números</button>
   </div>
   <div class="bar">
     <button class="topics-btn" id="topicsBtn" aria-label="Choose topics and settings">
@@ -288,9 +319,7 @@
     <div class="sec">Options</div>
     <div class="group">
       <div class="opt" data-opt="dueOnly"><div class="opt-txt">Unlearned only<small>Hide words you've marked "Got it"</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Turn off to mute everything</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="autoSay"><div class="opt-txt">Read aloud automatically<small>When a card flips or you get a verb right</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="showEn"><div class="opt-txt">Show English<small>Small translation under the Spanish</small></div><div class="switch"></div></div>
+      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Reads each word aloud. Turn off to mute.</small></div><div class="switch"></div></div>
     </div>
     <button class="reset" id="resetBtn">Reset learned progress</button>
     <p class="note">Progress is saved on this device.</p>
@@ -305,9 +334,7 @@
     <div class="vpop-top"><h2>Ajustes<small>Settings</small></h2>
       <button class="icon-btn" id="prefsX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="group" style="margin-top:16px">
-      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Turn off to mute everything</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="autoSay"><div class="opt-txt">Read aloud automatically<small>When a card flips or you get a verb right</small></div><div class="switch"></div></div>
-      <div class="opt" data-opt="showEn"><div class="opt-txt">Show English<small>Small translation under the Spanish</small></div><div class="switch"></div></div>
+      <div class="opt" data-opt="sound"><div class="opt-txt">Sound<small>Reads each word aloud. Turn off to mute.</small></div><div class="switch"></div></div>
     </div>
     <p class="note" id="noVoice" hidden>Your browser can't speak, so there's no sound to turn on.</p>
   </div>
@@ -319,6 +346,7 @@
 <script src="cards.js"></script>
 <script src="sentences.js"></script>
 <script src="verbs.js"></script>
+<script src="numbers.js"></script>
 <script>
 // ---------- Verb engine: present-tense forms + believable wrong answers ----------
 // (kept separate from the UI so it can be tested on its own)
@@ -480,15 +508,20 @@ window.VERB_ENGINE = (function () {
   const VERBS = window.VERBS || [];
   VERBS.forEach(t => t.cards.forEach(c => { c.id = "v:" + c.v; }));
   const VE = window.VERB_ENGINE;
+  const NE = window.NUM_ENGINE;
+  // Numbers: each topic is a list of numbers; turn them into cards like the other modes.
+  const NUMBERS = (window.NUMBERS || []).map(t => ({ ...t, cards: t.n.map(n => ({ n, id: "n:" + n, en: NE.fmt(n, t.plain), plain: !!t.plain })) }));
   const MODES = {
     words: setup(window.TOPICS || [], saved.selected, saved.known),
     sentences: setup(SENTENCES, saved.sSelected, saved.sKnown),
-    verbs: setup(VERBS, saved.vSelected, saved.vKnown)
+    verbs: setup(VERBS, saved.vSelected, saved.vKnown),
+    numbers: setup(NUMBERS, saved.nSelected, saved.nKnown)
   };
-  const MODE_ORDER = ["words", "sentences", "verbs"];
+  const MODE_ORDER = ["words", "sentences", "verbs", "numbers"];
+  const nextMode = () => MODE_ORDER[(MODE_ORDER.indexOf(S.mode) + 1) % MODE_ORDER.length];
   const S = {
     mode: MODE_ORDER.includes(saved.mode) ? saved.mode : "words",
-    dueOnly: !!saved.dueOnly, autoSay: saved.autoSay !== false, sound: saved.sound !== false, showEn: saved.showEn !== false,
+    dueOnly: !!saved.dueOnly, autoSay: true, sound: saved.sound !== false, showEn: true,   // sound on = read aloud; English always shown
     theme: saved.theme || null,
     deck: [], i: 0, flipped: false, seen: 0, got: 0, again: 0
   };
@@ -499,12 +532,13 @@ window.VERB_ENGINE = (function () {
   let TOPICS, T, ALL;
   const useMode = m => { S.mode = m; ({ TOPICS, T, ALL } = MODES[m]); };
   useMode(S.mode);
-  const unit = () => ({ words: "word", sentences: "sentence", verbs: "verb" })[S.mode];
+  const unit = () => ({ words: "word", sentences: "sentence", verbs: "verb", numbers: "number" })[S.mode];
   const spoken = c => c.full || c.es;
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({
     selected: [...MODES.words.selected], known: [...MODES.words.known],
     sSelected: [...MODES.sentences.selected], sKnown: [...MODES.sentences.known],
-    vSelected: [...MODES.verbs.selected], vKnown: [...MODES.verbs.known], mode: S.mode, dueOnly: S.dueOnly, autoSay: S.autoSay, sound: S.sound, showEn: S.showEn, theme: S.theme
+    vSelected: [...MODES.verbs.selected], vKnown: [...MODES.verbs.known],
+    nSelected: [...MODES.numbers.selected], nKnown: [...MODES.numbers.known], mode: S.mode, dueOnly: S.dueOnly, autoSay: S.autoSay, sound: S.sound, showEn: S.showEn, theme: S.theme
   })); } catch (e) {} };
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
@@ -569,7 +603,7 @@ window.VERB_ENGINE = (function () {
       stage.innerHTML = `<div class="done">
           <img src="${img(none ? "books" : allKnown ? "trophy" : "party-popper")}" alt="">
           <h2>${none ? "No topics" : allKnown ? "¡Todo aprendido!" : "¡Muy bien!"}</h2>
-          <p>${none ? "Choose at least one topic to study." : allKnown ? "You've learned every ${unit()} in these topics." : S.mode === "verbs" ? `${S.got} right first time · ${S.again} took a few tries` : `${S.got} got it · ${S.again} needed another look`}</p>
+          <p>${none ? "Choose at least one topic to study." : allKnown ? "You've learned every ${unit()} in these topics." : S.mode === "verbs" || S.mode === "numbers" ? `${S.got} right first time · ${S.again} took a few tries` : `${S.got} got it · ${S.again} needed another look`}</p>
           ${none ? "" : `<button class="big" id="goAgain">${allKnown ? "Review them all" : "Go again"}</button>`}
           <button class="pill" id="goTopics">Change topics</button></div>`;
       if ($("goAgain")) $("goAgain").onclick = () => { if (allKnown && S.dueOnly) { S.dueOnly = false; persist(); } build(); };
@@ -577,6 +611,7 @@ window.VERB_ENGINE = (function () {
       return;
     }
     if (S.mode === "verbs") return renderVerb();
+    if (S.mode === "numbers") return renderNumber();
     const c = S.deck[S.i];
     const tag = `<div class="tag">${esc(c.topic.es)}${S.known.has(c.id) ? ' · <span class="known">✓ learned</span>' : ""}</div>`;
     const stamps = `<span class="stamp got">Got it</span><span class="stamp again">Again</span>`;
@@ -671,8 +706,8 @@ window.VERB_ENGINE = (function () {
       $("vmsg").innerHTML = `<span class="v-msg" style="color:var(--accent)" lang="es">${q.tries === 1 ? "Casi… ¡otra vez!" : "¡Sigue intentando!"}</span>`;
     }
   }
-  function cheer(t) {
-    const grid = $("vgrid"); if (!grid) return;
+  function cheer(t, box) {
+    const grid = box || $("vgrid"); if (!grid) return;
     const fb = document.createElement("div");
     fb.className = "vfb"; fb.textContent = CHEERS[Math.floor(Math.random() * CHEERS.length)];
     grid.appendChild(fb);
@@ -686,6 +721,99 @@ window.VERB_ENGINE = (function () {
       grid.appendChild(s);
     }
   }
+  /* ---------- numbers practice ---------- */
+  // Two kinds of question: "build" (see 347.512, tap the words in order) and "listen" (hear it, type the digits).
+  function renderNumber() {
+    const c = S.deck[S.i];
+    if (S.q && S.q.at === S.i && S.q.kind === "listen" && !(canSay && S.sound)) S.q = null;   // sound turned off: switch to building
+    if (!S.q || S.q.at !== S.i) {
+      const kind = canSay && S.sound && Math.random() < 0.5 ? "listen" : "build";
+      const t = NE.tiles(c.n);
+      S.q = { c, at: S.i, kind, right: t.right, tiles: t.tiles, placed: [], tries: 0, done: false, peeked: false, spoken: NE.words(c.n) };
+    }
+    const q = S.q;
+    const tag = `<div class="tag">${esc(c.topic.es)}${S.known.has(c.id) ? ' · <span class="known">✓ learned</span>' : ""}</div>`;
+    if (q.kind === "build") {
+      $("stage").innerHTML = `<div class="nb" id="nbox">${tag}
+          <div class="nnum">${esc(c.en)}</div>
+          <div class="nhow">Tap the words in order. Tap a word again to take it back.</div>
+          <div class="nans" id="nans" lang="es"></div>
+          <div class="nbank" id="nbank" lang="es">${q.tiles.map((w, i) => `<button class="ntile" data-i="${i}">${esc(w)}</button>`).join("")}</div>
+          <div class="nfoot"><span class="v-msg" id="nmsg"></span>
+            <button class="pill" id="nclear">Borrar</button><button class="pill" id="nskip">Skip</button></div>
+        </div>`;
+      document.querySelectorAll("#nbank .ntile").forEach(b => b.onclick = () => place(+b.dataset.i));
+      $("nclear").onclick = () => { if (!q.done) { q.placed = []; drawAnswer(); } };
+      drawAnswer();
+    } else {
+      $("stage").innerHTML = `<div class="nb" id="nbox">${tag}
+          <button class="nlisten" id="nplay" aria-label="Play the number again"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
+          <div class="nhow">Escucha y escribe el número. Tap to hear it again.</div>
+          <input class="ninput" id="ninput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="0" aria-label="Type the number you hear">
+          <div class="nwords" id="nwords" lang="es"></div>
+          <div class="nfoot"><span class="v-msg" id="nmsg"></span>
+            <button class="pill" id="nshow">Show</button><button class="pill" id="nskip">Skip</button><button class="go" id="ncheck">Check</button></div>
+        </div>`;
+      $("nplay").onclick = () => say(q.spoken);
+      $("ncheck").onclick = checkHeard;
+      $("ninput").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); checkHeard(); } };
+      $("nshow").onclick = () => { q.peeked = true; $("nwords").textContent = q.spoken; };
+      setTimeout(() => { if (S.q === q) say(q.spoken); }, 250);
+      $("ninput").focus();
+    }
+    $("nskip").onclick = () => nextVerb(false, true);
+  }
+  // build mode
+  function place(i) {
+    const q = S.q; if (!q || q.done || q.placed.includes(i)) return;
+    q.placed.push(i); drawAnswer();
+    if (q.placed.length === q.right.length) checkBuilt();
+  }
+  function unplace(pos) {
+    const q = S.q; if (!q || q.done || pos < 0) return;
+    q.placed.splice(pos, 1); drawAnswer();
+  }
+  function drawAnswer(bad) {
+    const q = S.q, box = $("nans"); if (!box) return;
+    box.innerHTML = q.placed.length ? q.placed.map((i, pos) =>
+      `<button class="ntile${bad && bad.includes(pos) ? " bad" : ""}" data-pos="${pos}">${esc(q.tiles[i])}</button>`).join("")
+      : `<span class="ph">Tap the words below</span>`;
+    box.querySelectorAll(".ntile").forEach(b => b.onclick = () => unplace(+b.dataset.pos));
+    document.querySelectorAll("#nbank .ntile").forEach(b => b.classList.toggle("used", q.placed.includes(+b.dataset.i)));
+  }
+  function checkBuilt() {
+    const q = S.q, got = q.placed.map(i => q.tiles[i]);
+    if (got.join(" ") === q.right.join(" ")) return numberRight($("nans"));
+    q.tries++;
+    const bad = got.map((w, pos) => w !== q.right[pos] ? pos : -1).filter(p => p >= 0);
+    drawAnswer(bad);
+    buzz([40, 50, 40]);
+    $("nmsg").innerHTML = `<span style="color:var(--accent)">Casi… tap the red ${bad.length === 1 ? "word" : "words"} to fix ${bad.length === 1 ? "it" : "them"}.</span>`;
+  }
+  // listen mode
+  function checkHeard() {
+    const q = S.q, inp = $("ninput"); if (!q || q.done || !inp) return;
+    const typed = inp.value.replace(/\D/g, "");
+    if (!typed) { inp.focus(); return; }
+    if (typed === String(q.c.n)) { inp.value = NE.fmt(q.c.n, q.c.plain); inp.classList.add("good"); inp.blur(); return numberRight(inp); }
+    q.tries++;
+    inp.classList.remove("bad"); void inp.offsetWidth; inp.classList.add("bad");
+    buzz([40, 50, 40]);
+    $("nmsg").innerHTML = `<span style="color:var(--accent)">${q.tries === 1 ? "No… ¡escucha otra vez!" : "¡Sigue intentando!"}</span>`;
+    say(q.spoken);
+    inp.select();
+  }
+  function numberRight(el) {
+    const q = S.q; q.done = true;
+    if (el.id === "nans") el.classList.add("right");
+    cheer(el, $("nbox"));
+    buzz(35);
+    if (q.kind === "build") say(q.spoken);
+    if ($("nwords")) $("nwords").textContent = q.spoken;
+    $("nmsg").innerHTML = `<span style="color:var(--good)" lang="es">${esc(q.kind === "build" ? q.c.en : q.spoken)}</span>`;
+    setTimeout(() => nextVerb(q.tries === 0 && !q.peeked), 1500);
+  }
+
   function openRule() {
     const q = S.q; if (!q) return;
     const c = q.c, I = VE.info(c, (c.topic.parent || c.topic).id), R = I.rule;
@@ -845,13 +973,12 @@ window.VERB_ENGINE = (function () {
     renderOpts();
     const p = pool(), n = S.dueOnly ? p.filter(c => !S.known.has(c.id)).length : p.length;
     $("doneCount").textContent = S.selected.size ? plural(n, unit()) : "pick a topic";
-    $("sheetTitle").textContent = ({ words: "Topics", sentences: "Frases", verbs: "Verbos" })[S.mode];
+    $("sheetTitle").textContent = ({ words: "Topics", sentences: "Frases", verbs: "Verbos", numbers: "Números" })[S.mode];
     $("doneBtn").disabled = S.selected.size === 0;
   }
   function renderOpts() {
     document.querySelectorAll(".opt").forEach(o => o.classList.toggle("on", !!S[o.dataset.opt]));
-    document.querySelectorAll('[data-opt="autoSay"]').forEach(o => o.classList.toggle("dim", !S.sound));
-    if (!canSay) { document.querySelectorAll('[data-opt="autoSay"], [data-opt="sound"]').forEach(o => o.hidden = true); $("noVoice").hidden = false; }
+    if (!canSay) { document.querySelectorAll('[data-opt="sound"]').forEach(o => o.hidden = true); $("noVoice").hidden = false; }
     $("mutedDot").hidden = !canSay || S.sound;
     $("prefsBtn").setAttribute("aria-label", canSay && !S.sound ? "Settings (sound off)" : "Settings");
   }
@@ -860,7 +987,7 @@ window.VERB_ENGINE = (function () {
     S[k] = !S[k]; persist();
     if (k === "sound" && !S.sound && canSay) speechSynthesis.cancel();
     if (!$("settings").hidden) renderSettings(); else renderOpts();
-    if (!$("prefs").hidden && (k === "sound" || k === "showEn")) prefsChanged = true;
+    if (!$("prefs").hidden && k === "sound") prefsChanged = true;
   });
   // Settings pop-up: open from the gear on any tab, close with ✕, tapping outside, Esc or back.
   let prefsChanged = false;
@@ -906,12 +1033,21 @@ window.VERB_ENGINE = (function () {
     if (!$("prefs").hidden) { if (e.key === "Escape") closePrefs(); return; }
     if (!$("vpop").hidden) { if (e.key === "Escape") closeRule(); return; }
     if (!$("settings").hidden) { if (e.key === "Escape") $("doneBtn").click(); return; }
+    if (e.target && e.target.tagName === "INPUT") return;   // typing a number
     const k = e.key.toLowerCase();
+    if (S.mode === "numbers") {
+      if (k === "s") nextVerb(false, true);
+      else if (k === "p" && S.q) say(S.q.spoken);
+      else if (k === "backspace" && S.q && S.q.kind === "build") { e.preventDefault(); unplace(S.q.placed.length - 1); }
+      else if (k === "m") switchMode(nextMode());
+      else if (k === "t") openSettings();
+      return;
+    }
     if (S.mode === "verbs") {
       if (k === "s") nextVerb(false, true);
       else if (k === "p" && S.q) say(S.q.spoken);
       else if (k === "r" || k === "?") openRule();
-      else if (k === "m") switchMode(MODE_ORDER[(MODE_ORDER.indexOf(S.mode) + 1) % 3]);
+      else if (k === "m") switchMode(nextMode());
       else if (k === "t") openSettings();
       else if (/^[1-8]$/.test(k)) { const t = document.querySelectorAll(".vt")[+k - 1]; if (t) t.click(); }
       return;
@@ -921,7 +1057,7 @@ window.VERB_ENGINE = (function () {
     else if (k === "arrowleft" || k === "a") advance("again");
     else if (k === "s") advance("skip");
     else if (k === "p" && S.deck[S.i]) say(spoken(S.deck[S.i]));
-    else if (k === "m") switchMode(MODE_ORDER[(MODE_ORDER.indexOf(S.mode) + 1) % 3]);
+    else if (k === "m") switchMode(nextMode());
     else if (k === "t") openSettings();
   });
 
