@@ -763,14 +763,22 @@ window.VERB_ENGINE = (function () {
       drawAnswer();
     } else {
       $("stage").innerHTML = `<div class="nb" id="nbox">${tag}
-          <button class="nlisten" id="nplay" aria-label="Play the number again"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
+          <button class="nlisten" id="nplay" tabindex="-1" aria-label="Play the number again"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
           <div class="nhow">Escucha y escribe el número. Tap to hear it again.</div>
           <input class="ninput" id="ninput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="0" aria-label="Type the number you hear">
           <div class="nwords" id="nwords" lang="es"></div>
           <div class="nfoot"><span class="v-msg" id="nmsg"></span>
             <button class="pill" id="nshow">Show</button><button class="pill" id="nskip">Skip</button><button class="go" id="ncheck">Check</button></div>
         </div>`;
-      $("nplay").onclick = () => say(q.spoken);
+      // Replay without stealing focus from the number box, so the keyboard stays up and you can keep typing.
+      const keepFocus = e => { if (document.activeElement === $("ninput")) e.preventDefault(); };
+      $("nplay").onpointerdown = keepFocus;
+      $("nplay").onmousedown = keepFocus;
+      $("nplay").onclick = () => {
+        say(q.spoken);
+        const inp = $("ninput");
+        if (inp && !q.done) { inp.focus({ preventScroll: true }); const end = inp.value.length; try { inp.setSelectionRange(end, end); } catch (e) {} }
+      };
       $("ncheck").onclick = checkHeard;
       $("ninput").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); checkHeard(); } };
       $("nshow").onclick = () => { q.peeked = true; $("nwords").textContent = q.spoken; };
